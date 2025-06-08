@@ -1,7 +1,11 @@
 { userSettings, ... }: {
   programs.git = {
-    programs.git.enable = true;
-    programs.git.userName = userSettings.github-username;
-    programs.git.userEmail = userSettings.email;
+    enable = true;
+    userName = userSettings.github-username;
+    userEmail = userSettings.email;
+
+    extraConfig.credential.helper = "manager";
+    extraConfig.credential."https://github.com".username = "YourUserName";
+    extraConfig.credential.credentialStore = "pass";
   };
 }

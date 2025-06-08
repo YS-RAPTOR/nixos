@@ -22,6 +22,8 @@ let
     zoxide
     direnv
     oh-my-posh
+    pass
+    git-credential-manager
 
     # programming languages
     gcc
