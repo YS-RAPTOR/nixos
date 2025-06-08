@@ -9,6 +9,7 @@
     ./zoxide.nix
     ./oh-my-posh.nix
     ./github.nix
+    ./lazygit.nix
 
   ];
 }

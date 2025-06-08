@@ -3,7 +3,7 @@
     enable = true;
     enableFishIntegration = true;
     settings = {
-      manager.show_hidden = true;
+      mgr.show_hidden = true;
       preview = {
         wrap = "yes";
         max_width = 500;

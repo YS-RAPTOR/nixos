@@ -6,6 +6,6 @@
 
     extraConfig.credential.helper = "manager";
     extraConfig.credential."https://github.com".username = "YourUserName";
-    extraConfig.credential.credentialStore = "pass";
+    extraConfig.credential.credentialStore = "gpg";
   };
 }

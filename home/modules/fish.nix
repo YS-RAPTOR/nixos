@@ -8,7 +8,7 @@
     '';
     loginShellInit = ''
       if uwsm check may-start
-          exec uwsm start hyprland.desktop
+          exec uwsm start default 
       end
     '';
     shellInit = ''
