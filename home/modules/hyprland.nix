@@ -15,7 +15,7 @@
 
       "$terminal" = "ghostty";
       "$fileManager" = "dolphin";
-      "$menu" = "wofi - -show drun";
+      "$menu" = "wofi --show drun";
       "$browser" = "zen";
 
       general = {
@@ -125,7 +125,7 @@
         "$mainMod, E, exec, $fileManager"
         "$mainMod, F, togglefloating,"
         "$mainMod, R, exec, $menu"
-        "$mainMod, D, exec, $browser,"
+        "$mainMod, D, exec, $browser"
         "$mainMod, P, pseudo,"
         "$mainMod, J, togglesplit,"
 
