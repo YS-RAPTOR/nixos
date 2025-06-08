@@ -68,13 +68,6 @@
   ];
 
 services = {
-  displayManager = {
-    sddm = {
-      enable = true;
-      wayland.enable = true;
-    };
-    defaultSession = "hyprland-uwsm";
-  };
   pipewire = {
     enable = true;
     audio.enable = true;
