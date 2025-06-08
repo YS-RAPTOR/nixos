@@ -4,7 +4,7 @@
     config = { theme = "tokyonight_night"; };
     themes = {
       tokyonight_night = {
-        src = "${userSettings.homeDir}/themes";
+        src = "${userSettings.nixDir}/themes";
         file = "tokyonight_night.tmTheme";
       };
     };

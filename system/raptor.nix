@@ -3,15 +3,15 @@ let
   myScript = ''
     if [ "$1" = "sync" ]; then
       if [ "$#" = 1 ]; then
-  '' + userSettings.dotfilesDir + ''
+  '' + userSettings.nixDir + ''
     /sync.sh;
               exit 0;
             elif [ "$2" = "user" ]; then
-  '' + userSettings.dotfilesDir + ''
+  '' + userSettings.nixDir + ''
     /sync-user.sh;
               exit 0;
             elif [ "$2" = "system" ]; then
-  '' + userSettings.dotfilesDir + ''
+  '' + userSettings.nixDir + ''
     /sync-system.sh;
               exit 0;
             else
@@ -21,28 +21,28 @@ let
             if [ "$#" -gt 1 ]; then
               echo "Warning: The 'refresh' command has no subcommands (no $2 subcommand)";
             fi
-  '' + userSettings.dotfilesDir + ''
+  '' + userSettings.nixDir + ''
     /sync-posthook.sh;
             exit 0;
           elif [ "$1" = "update" ]; then
             if [ "$#" -gt 1 ]; then
               echo "Warning: The 'update' command has no subcommands (no $2 subcommand)";
             fi
-  '' + userSettings.dotfilesDir + ''
+  '' + userSettings.nixDir + ''
     /update.sh;
             exit 0;
           elif [ "$1" = "upgrade" ]; then
             if [ "$#" -gt 1 ]; then
               echo "Warning: The 'update' command has no subcommands (no $2 subcommand)";
             fi
-  '' + userSettings.dotfilesDir + ''
+  '' + userSettings.nixDir + ''
     /upgrade.sh;
             exit 0;
           elif [ "$1" = "pull" ]; then
             if [ "$#" -gt 1 ]; then
               echo "Warning: The 'upgrade' command has no subcommands (no $2 subcommand)";
             fi
-  '' + userSettings.dotfilesDir + ''
+  '' + userSettings.nixDir + ''
     /pull.sh;
             exit 0;
           elif [ "$1" = "gc" ]; then

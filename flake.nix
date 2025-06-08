@@ -22,7 +22,8 @@
       };
       userSettings = rec {
         username = "raptor";
-        homeDir = "/home/" + username;
+        homeDir = "/home/${username}";
+        nixDir = "/home/${username}/nixos";
         github-username = "YS-Raptor";
         name = "Yashan";
         email = "yashan.sumanaratne@gmail.com";

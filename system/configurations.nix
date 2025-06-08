@@ -1,9 +1,9 @@
 { pkgs, systemSettings, userSettings, ... }: {
   imports = [
     ./hardware-configuration.nix
-    ./modules/zzz.nix
-    ./packages.nix
     ./raptor.nix
+    ./packages.nix
+    ./modules/zzz.nix
   ];
 
   networking = {

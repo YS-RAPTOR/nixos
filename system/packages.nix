@@ -1,4 +1,4 @@
-{ pkgs, pkgs-stable }:
+{ pkgs, pkgs-stable, ... }:
 let
   default-packages = with pkgs; [
     neovim
@@ -13,7 +13,6 @@ let
     yazi
     fzf
     ripgrep
-    grep
     eza
     fd
 

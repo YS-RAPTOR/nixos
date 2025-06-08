@@ -10,15 +10,14 @@
 
   # NeoVim setup
   xdg.configFile."nvim".source =
-    config.lib.file.mkOutOfStoreSymlink "${userSettings.homeDir}/nixos/nvim";
-  xdg.configFile."dictionary".source = config.lib.file.mkOutOfStoreSymlink
-    "${userSettings.homeDir}/nixos/dictionary";
+    config.lib.file.mkOutOfStoreSymlink "${userSettings.nixDir}/nvim";
+  xdg.configFile."dictionary".source =
+    config.lib.file.mkOutOfStoreSymlink "${userSettings.nixDir}/dictionary";
 
   # Environment Variables
   home.sessionVariables = {
     EDITOR = "nvim";
     VISUAL = "nvim";
-
   };
 
   home.stateVersion = "25.05"; # Please read the comment before changing.
