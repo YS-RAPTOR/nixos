@@ -6,6 +6,7 @@
     ./pipewire.nix
     ./bluetooth.nix
     ./gpg.nix
+    ./fonts.nix
 
   ];
 }

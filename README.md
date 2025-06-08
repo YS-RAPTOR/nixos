@@ -23,3 +23,4 @@
 - [ ] xdg-desktop-portal-hyprland
 - [ ] waybar
 - [ ] wofi
+- [ ] ghostty

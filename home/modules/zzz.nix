@@ -12,6 +12,6 @@
     ./lazygit.nix
     ./wm.nix
     ./hyprland.nix
-
+    ./ghostty.nix
   ];
 }
