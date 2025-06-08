@@ -1,6 +1,10 @@
-{ ... }: {
+{ pkgs, ... }: {
   programs.fish = {
     enable = true;
+    plugins = [{
+      name = "fzf-fish";
+      src = pkgs.fishPlugins.fzf-fish.src;
+    }];
     interactiveShellInit = ''
       if not set -q TMUX
         exec tmux -u new -A -D -t base

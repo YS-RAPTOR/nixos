@@ -3,14 +3,14 @@
     enable = true;
 
     # Plugin configuration
-    plugins = with pkgs; [
-      tmuxPlugins.sensible
-      tmuxPlugins.vim-tmux-navigator
-      tmuxPlugins.yank
-      tmuxPlugins.resurrect
-      tmuxPlugins.continuum
+    plugins = with pkgs.tmuxPlugins; [
+      sensible
+      vim-tmux-navigator
+      yank
+      resurrect
+      continuum
       {
-        plugin = tmuxPlugins.tmux-sessionx;
+        plugin = tmux-sessionx;
         extraConfig = ''
           set -g @sessionx-zoxide-mode 'on'
           set -g @sessionx-window-mode 'on'
