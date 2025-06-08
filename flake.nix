@@ -23,7 +23,8 @@
       userSettings = rec {
         username = "raptor";
         homeDir = "/home/${username}";
-        nixDir = "/home/${username}/nixos";
+        nixDir = "/home/${username}/nixos/";
+        dotfilesDir = "/home/${username}/nixos/dotfiles";
         github-username = "YS-Raptor";
         name = "Yashan";
         email = "yashan.sumanaratne@gmail.com";

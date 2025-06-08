@@ -38,7 +38,7 @@
       bind-key -T copy-mode-vi v send-keys -X begin-selection
       bind-key -T copy-mode-vi C-q send-keys -X rectangle-toggle
       bind-key -T copy-mode-vi y send-keys -X copy-selection-and-cancel
-      bind-key -T root C-_ run-shell "${userSettings.nixDir}/tmux/console.sh"
+      bind-key -T root C-_ run-shell "${userSettings.dotfilesDir}/tmux/console.sh"
 
       # Remaps
       unbind C-b
@@ -86,7 +86,7 @@
       set-option -g window-status-format "#[bg=#15151d,fg=#a9b1d6]#[bg=#a9b1d6,fg=#212121]#I #{?window_zoomed_flag,󰛭,} #W#[fg=#a9b1d6,bg=#15151d]#[none]"
 
       ### Right side
-      set-option -g status-right "#(${userSettings.nixDir}/tmux/youtube-status.sh)#[bg=#15151d, fg=#9d7cd8]#[fg=#15151d, bg=#9d7cd8] %H:%M:%S#[bg=#9d7cd8, fg=#192c2c]#[bg=#15151d, fg=#7aa2f7]#[bg=#7aa2f7, fg=#15151d] %D "
+      set-option -g status-right "#(${userSettings.dotfilesDir}/tmux/youtube-status.sh)#[bg=#15151d, fg=#9d7cd8]#[fg=#15151d, bg=#9d7cd8] %H:%M:%S#[bg=#9d7cd8, fg=#192c2c]#[bg=#15151d, fg=#7aa2f7]#[bg=#7aa2f7, fg=#15151d] %D "
     '';
   };
 }

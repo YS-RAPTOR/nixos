@@ -7,23 +7,24 @@ let
     waybar
     git
     home-manager
-    bat
     fish
-    tmux
+
+    # utils
     yazi
+    tmux
+    bat
     fzf
     ripgrep
     eza
     fd
-
-    # utils
     unzip
     lazygit
     zoxide
     direnv
     oh-my-posh
-    pass
-    git-credential-manager
+
+    # wm
+    dunst
 
     # programming languages
     gcc

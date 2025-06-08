@@ -10,9 +10,9 @@
 
   # NeoVim setup
   xdg.configFile."nvim".source =
-    config.lib.file.mkOutOfStoreSymlink "${userSettings.nixDir}/nvim";
+    config.lib.file.mkOutOfStoreSymlink "${userSettings.dotfilesDir}/nvim";
   xdg.configFile."dictionary".source =
-    config.lib.file.mkOutOfStoreSymlink "${userSettings.nixDir}/dictionary";
+    config.lib.file.mkOutOfStoreSymlink "${userSettings.dotfilesDir}/dictionary";
 
   # Environment Variables
   home.sessionVariables = {
