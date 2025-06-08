@@ -7,7 +7,7 @@
     }];
     interactiveShellInit = ''
       if not set -q TMUX
-        exec tmux -u new -A -D -t base
+        exec tmux -u new -A -t base
       end
     '';
     loginShellInit = ''
