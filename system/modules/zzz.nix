@@ -4,6 +4,7 @@
     ./boot.nix
     ./timelocale.nix
     ./pipewire.nix
+    ./bluetooth.nix
 
   ];
 }

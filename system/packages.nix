@@ -15,6 +15,7 @@ let
     ripgrep
     grep
     eza
+    fd
 
     # utils
     unzip
