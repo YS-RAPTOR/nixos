@@ -4,7 +4,6 @@ let
     neovim
     google-chrome
     ghostty
-    waybar
     git
     home-manager
     fish
@@ -25,6 +24,15 @@ let
 
     # wm
     dunst
+    kdePackages.dolphin
+    waybar
+    hyprpaper
+    wofi
+    vesktop
+    hyprpicker
+    cliphist
+    hypridle
+    hyprlock
 
     # programming languages
     gcc

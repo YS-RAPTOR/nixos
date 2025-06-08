@@ -10,7 +10,8 @@
     ./oh-my-posh.nix
     ./github.nix
     ./lazygit.nix
-    ./dunst.nix
+    ./wm.nix
+    ./hyprland.nix
 
   ];
 }
