@@ -1,4 +1,4 @@
-{ config, pkgs, pkgs-stable, userSettings, systemSettings, ... }:
+{ config, pkgs, pkgs-stable, userSettings, systemSettings, inputs, ... }:
 
 {
   imports = [ ./modules/zzz.nix ];
@@ -6,13 +6,16 @@
   # user setup
   home.username = userSettings.username;
   home.homeDirectory = userSettings.homeDir;
-  home.packages = [ ];
+  home.packages = [
+    inputs.zen-browser.packages."${systemSettings.system}".default
+
+  ];
 
   # NeoVim setup
   xdg.configFile."nvim".source =
     config.lib.file.mkOutOfStoreSymlink "${userSettings.dotfilesDir}/nvim";
-  xdg.configFile."dictionary".source =
-    config.lib.file.mkOutOfStoreSymlink "${userSettings.dotfilesDir}/dictionary";
+  xdg.configFile."dictionary".source = config.lib.file.mkOutOfStoreSymlink
+    "${userSettings.dotfilesDir}/dictionary";
 
   # Environment Variables
   home.sessionVariables = {

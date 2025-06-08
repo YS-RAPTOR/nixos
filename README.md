@@ -2,9 +2,9 @@
 
 - [x] Migrate existing configurations into nix
 - [x] Install all required utilities for desktop environment
-- [ ] Simple hyprland configuration
-- [ ] Setup simple app launcher
-- [ ] Get zen-browser working
+- [x] Simple hyprland configuration
+- [x] Setup simple app launcher
+- [x] Get zen-browser working
 
 # Optionals
 

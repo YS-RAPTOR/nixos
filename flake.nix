@@ -9,6 +9,10 @@
     nixpkgs-stable.url = "nixpkgs/nixos-25.05";
     home-manager-stable.url = "github:nix-community/home-manager/release-25.05";
     home-manager-stable.inputs.nixpkgs.follows = "nixpkgs-stable";
+
+    zen-browser.url = "github:0xc000022070/zen-browser-flake";
+    zen-browser.inputs.nixpkgs.follows = "nixpkgs-unstable";
+
   };
   outputs = inputs@{ self, ... }:
     let

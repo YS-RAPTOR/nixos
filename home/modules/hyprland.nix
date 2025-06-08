@@ -16,14 +16,14 @@
       "$terminal" = "ghostty";
       "$fileManager" = "dolphin";
       "$menu" = "wofi - -show drun";
-      "$browser" = "zen-browser";
+      "$browser" = "zen";
 
       general = {
         border_size = 2;
         gaps_in = 4;
         gaps_out = 4;
-        col.active_border = "rgba(33ccffee) rgba(00ff99ee) 45deg";
-        col.inactive_border = "rgba(595959aa)";
+        "col.active_border" = "rgba(33ccffee) rgba(00ff99ee) 45deg";
+        "col.inactive_border" = "rgba(595959aa)";
         resize_on_border = false;
         allow_tearing = false;
         layout = "dwindle";
@@ -169,7 +169,7 @@
 
         # Move/resize windows with mainMod + LMB/RMB and dragging
         "$mainMod, mouse:272, movewindow"
-        "$mainMod, mouse:273, resizewindow"
+        "$mainMod, mouse:273, resizeactive"
       ];
 
       # Laptop multimedia keys for volume and LCD brightness
