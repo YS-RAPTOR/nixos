@@ -21,6 +21,8 @@ let
     zoxide
     direnv
     oh-my-posh
+    brightnessctl
+    playerctl
 
     # wm
     dunst
