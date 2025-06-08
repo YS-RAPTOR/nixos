@@ -7,7 +7,7 @@
       end
     '';
     loginShellInit = ''
-      if uwsm check may-start
+      if uwsm check may-start > /dev/null 2>&1
           exec uwsm start default 
       end
     '';
