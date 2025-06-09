@@ -11,7 +11,7 @@
     systemd.enable = false;
 
     settings = {
-      monitor = ",highres@highrr,auto,auto";
+      monitor = ",1920x1080@59,auto,auto";
 
       "$terminal" = "ghostty";
       "$fileManager" = "dolphin";
@@ -47,6 +47,7 @@
           passes = 2;
           vibrancy = 0.1696;
         };
+        blurls = "waybar";
       };
 
       # https://wiki.hyprland.org/Configuring/Variables/#animations

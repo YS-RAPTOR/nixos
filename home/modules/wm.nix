@@ -53,6 +53,12 @@ in {
       };
     };
   };
+  programs.waybar = {
+    systemd.enable = true;
+    enable = true;
+
+  };
+
   programs.hyprlock = {
     enable = true;
     settings = {

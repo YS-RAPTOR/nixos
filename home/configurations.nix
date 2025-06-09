@@ -8,7 +8,13 @@
   home.homeDirectory = userSettings.homeDir;
   home.packages = [
     inputs.zen-browser.packages."${systemSettings.system}".default
-
+    pkgs.wget
+    pkgs.jq
+    pkgs.wl-clipboard
+    pkgs.networkmanager_dmenu
+    pkgs.light
+    pkgs.btop
+    pkgs.pavucontrol
   ];
 
   # NeoVim setup
@@ -16,7 +22,8 @@
     config.lib.file.mkOutOfStoreSymlink "${userSettings.dotfilesDir}/nvim";
   xdg.configFile."dictionary".source = config.lib.file.mkOutOfStoreSymlink
     "${userSettings.dotfilesDir}/dictionary";
-
+  xdg.configFile."waybar".source =
+    config.lib.file.mkOutOfStoreSymlink "${userSettings.dotfilesDir}/waybar";
   # Environment Variables
   home.sessionVariables = {
     EDITOR = "nvim";
