@@ -7,6 +7,5 @@
     ./bluetooth.nix
     ./gpg.nix
     ./fonts.nix
-
   ];
 }

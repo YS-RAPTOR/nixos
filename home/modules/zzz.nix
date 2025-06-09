@@ -13,5 +13,6 @@
     ./wm.nix
     ./hyprland.nix
     ./ghostty.nix
+    ./cursors.nix
   ];
 }

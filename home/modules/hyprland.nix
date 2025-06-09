@@ -15,7 +15,7 @@
       exec-once = [
         "vesktop &"
         "bash -c 'sleep 5 && hyprctl dispatch workspace 1 && ghostty' &"
-
+        "hyprctl set-cursor hyprctl setcursor Notwaita-White 24 &"
       ];
 
       "$terminal" = "ghostty";
