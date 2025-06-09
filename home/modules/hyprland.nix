@@ -52,6 +52,7 @@
           passes = 2;
           vibrancy = 0.1696;
         };
+        layerrule = "blur,waybar";
         blurls = "waybar";
       };
 
