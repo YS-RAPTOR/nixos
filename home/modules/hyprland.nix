@@ -11,7 +11,12 @@
     systemd.enable = false;
 
     settings = {
-      monitor = ",1920x1080@59,auto,auto";
+      monitor = "eDP-1,1920x1080@59.99900,auto,1";
+      exec-once = [
+        "vesktop &"
+        "bash -c 'sleep 5 && hyprctl dispatch workspace 1 && ghostty' &"
+
+      ];
 
       "$terminal" = "ghostty";
       "$fileManager" = "dolphin";
@@ -90,6 +95,7 @@
         "rounding 0, floating:0, onworkspace:w[tv1]"
         "bordersize 0, floating:0, onworkspace:f[1]"
         "rounding 0, floating:0, onworkspace:f[1]"
+        "workspace 6, class:^(vesktop)$"
       ];
 
       dwindle = {

@@ -3,6 +3,7 @@
   font-size: 14px;
   font-family: "CaskaydiaCove Nerd Font Mono, CaskaydiaCove NFM Regular";
   min-height: 15px;
+  color: #ffffff;
 }
 
 window#waybar {
