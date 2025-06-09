@@ -14,8 +14,8 @@
       monitor = "eDP-1,1920x1080@59.99900,auto,1";
       exec-once = [
         "vesktop &"
+        "hyprctl setcursor Notwaita-White 24 &"
         "bash -c 'sleep 5 && hyprctl dispatch workspace 1 && ghostty' &"
-        "hyprctl set-cursor hyprctl setcursor Notwaita-White 24 &"
       ];
 
       "$terminal" = "ghostty";
