@@ -21,7 +21,7 @@
       "$terminal" = "ghostty";
       "$fileManager" = "dolphin";
       "$menu" = "wofi --show drun";
-      "$browser" = "zen";
+      "$browser" = "zen-beta";
 
       general = {
         border_size = 2;
