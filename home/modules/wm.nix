@@ -1,10 +1,22 @@
-{ ... }:
+{ userSettings, ... }:
 let font = "monospace";
 in {
   services = {
     dunst.enable = true;
     hyprpolkitagent.enable = true;
     cliphist.enable = true;
+
+    hyprpaper = {
+      enable = true;
+      settings = {
+        ipc = "on";
+        splash = false;
+        splash_offset = 2.0;
+        preload = [ "${userSettings.dotfilesDir}/Code Wallpaper.png" ];
+        wallpaper = [ ",${userSettings.dotfilesDir}/Code Wallpaper.png" ];
+      };
+
+    };
     hypridle = {
       enable = true;
       settings = {

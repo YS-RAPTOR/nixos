@@ -7,7 +7,16 @@
     }];
     interactiveShellInit = ''
       if not set -q TMUX
-        exec tmux -u new -A -t base
+        set i 0
+        while true
+          set padded (printf "dev-%03d" $i)
+          tmux has-session -t $padded 2>/dev/null
+          if test $status -ne 0
+            break
+          end
+          set i (math $i + 1)
+        end
+        exec tmux new-session -s $padded
       end
     '';
     loginShellInit = ''
