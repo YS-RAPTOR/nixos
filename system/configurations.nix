@@ -17,6 +17,8 @@
     extraGroups = [ "networkmanager" "wheel" ];
     shell = pkgs.fish;
   };
+  # automount
+  services.udisks2.enable = true;
 
   programs.fish.enable = true;
   programs.nix-ld.enable = true;

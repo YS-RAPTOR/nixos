@@ -23,6 +23,7 @@ let
     oh-my-posh
     brightnessctl
     playerctl
+    udiskie
 
     # wm
     dunst
@@ -44,9 +45,6 @@ let
     dotnet-sdk
     rustup
     uv
-
-    # Delete Later
-    kitty
   ];
 
   # If there are problems with the unstable branch
