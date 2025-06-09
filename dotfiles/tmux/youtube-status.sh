@@ -53,7 +53,7 @@ if ((artist_length < len_artist)); then
 fi
 
 function surround() {
-    music_status="#[bg=#15151d, fg=#f7768e]#[fg=#15151d, bg=#f7768e]$status ${title:0:len_title} by ${artist:0:len_artist} | $progress/$duration#[bg=#f7768e, fg=#15151d]"
+    music_status="#[bg=#15151d, fg=#f7768e]#[fg=#15151d, bg=#f7768e]$status ${title:0:len_title} by ${artist:0:len_artist} | $progress/$duration"
 }
 
 surround
