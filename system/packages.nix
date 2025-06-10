@@ -24,6 +24,7 @@ let
     brightnessctl
     playerctl
     udiskie
+    pkg-config
 
     # wm
     dunst

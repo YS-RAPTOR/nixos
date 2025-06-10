@@ -12,7 +12,6 @@
     pkgs.jq
     pkgs.wl-clipboard
     pkgs.networkmanager_dmenu
-    pkgs.light
     pkgs.btop
     pkgs.pavucontrol
   ];

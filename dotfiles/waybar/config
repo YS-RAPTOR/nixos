@@ -1,8 +1,8 @@
 {
   "layer": "top", "position": "top",
-  "modules-left": ["custom/logo", "clock",  "custom/weather", "temperature"],
+  "modules-left": ["custom/logo", "clock",  "custom/weather"],
   "modules-center": [  "hyprland/workspaces"],
-  "modules-right": ["tray",  "custom/clipboard", "custom/colorpicker", "bluetooth", "pulseaudio", "network",  "battery" ],
+  "modules-right": ["tray",  "custom/clipboard","backlight", "custom/colorpicker", "bluetooth", "pulseaudio", "network",  "battery" ],
   "reload_style_on_change":true,
 
   "custom/logo": {
@@ -100,6 +100,7 @@
     },
 "backlight": {
   "device": "auto",
+  "tooltip": false,
   "format": "<span font='12'>{icon}</span>",
   "format-icons": [
     "",
@@ -112,9 +113,13 @@
     "",
     "",
     "",
+    "",
+    "",
+    "",
+    "",
   ],
-  "on-scroll-down": "light -A 10",
-  "on-scroll-up": "light -U 10",
+  "on-scroll-down": "brightnessctl -e4 -n2 set 5%-",
+  "on-scroll-up": "brightnessctl -e4 -n2 set 5%+",
   "smooth-scrolling-threshold": 1
   },
 
