@@ -8,6 +8,12 @@ return {
                     build_on_save_step = "check",
                 },
             },
+            slangd = {
+                cmd = {
+                    "slangd",
+                    "--stdio",
+                },
+            },
         },
     },
 }
