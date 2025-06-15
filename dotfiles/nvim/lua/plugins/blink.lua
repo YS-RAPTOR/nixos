@@ -27,7 +27,7 @@ return {
                     dictionary = {
                         module = "blink-cmp-dictionary",
                         name = "Dict",
-                        score_offset = -1,
+                        score_offset = -1000,
                         min_keyword_length = 3,
                         opts = {
                             dictionary_files = {

@@ -25,6 +25,7 @@ let
     playerctl
     udiskie
     pkg-config
+    hyprshot
 
     # wm
     dunst

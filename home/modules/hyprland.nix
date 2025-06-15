@@ -149,6 +149,13 @@
         "$mainMod, P, pseudo,"
         "$mainMod, A, togglesplit,"
 
+        # Screenshot a window
+        "$mainMod, PRINT, exec, hyprshot -m window"
+        # Screenshot a monitor
+        ", PRINT, exec, hyprshot -m output"
+        # Screenshot a region
+        "$shiftMod, PRINT, exec, hyprshot -m region"
+
         # Move focus with mainMod + arrow keys
         "$mainMod, H, movefocus, l"
         "$mainMod, L, movefocus, r"

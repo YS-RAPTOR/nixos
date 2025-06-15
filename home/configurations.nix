@@ -14,6 +14,8 @@
     pkgs.networkmanager_dmenu
     pkgs.btop
     pkgs.pavucontrol
+    pkgs.freeoffice
+    pkgs.steam-run
   ];
 
   # NeoVim setup
