@@ -29,6 +29,16 @@
   home.sessionVariables = {
     EDITOR = "nvim";
     VISUAL = "nvim";
+    PAGER = "bat --paging=always";
+    MANPAGER = "bat --paging=always";
+    BROWSER = "xdg-open";
+    XDG_DESKTOP_DIR = "$HOME/Desktop";
+    XDG_DOWNLOAD_DIR = "$HOME/Downloads";
+    XDG_DOCUMENTS_DIR = "$HOME/Documents";
+    XDG_MUSIC_DIR = "$HOME/Music";
+    XDG_PICTURES_DIR = "$HOME/Pictures";
+    XDG_VIDEOS_DIR = "$HOME/Videos";
+    XDG_PUBLICSHARE_DIR = "$HOME/Public";
   };
 
   home.stateVersion = "25.05"; # Please read the comment before changing.

@@ -152,9 +152,9 @@
         # Screenshot a window
         "$mainMod, PRINT, exec, hyprshot -m window"
         # Screenshot a monitor
-        ", PRINT, exec, hyprshot -m output"
+        " , PRINT, exec, hyprshot -m output"
         # Screenshot a region
-        "$shiftMod, PRINT, exec, hyprshot -m region"
+        "$mainMod SHIFT, PRINT, exec, hyprshot -m region"
 
         # Move focus with mainMod + arrow keys
         "$mainMod, H, movefocus, l"
@@ -215,6 +215,11 @@
         ", XF86AudioPause, exec, playerctl play-pause"
         ", XF86AudioPlay, exec, playerctl play-pause"
         ", XF86AudioPrev, exec, playerctl previous"
+      ];
+
+      bindm = [
+        "$mainMod, mouse:272, movewindow"
+        "$mainMod, mouse:273, resizewindow"
       ];
 
       windowrule = [
