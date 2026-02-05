@@ -19,7 +19,7 @@
       tree = "eza --tree --icons";
       cat = "bat --paging=never";
       less = "bat --paging=always";
-      opencode = "GITHUB_TOKEN='' opencode";
+      opencode = "GITHUB_TOKEN='' command opencode";
     };
     functions = {
       _bind_bang = ''

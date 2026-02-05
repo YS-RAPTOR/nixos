@@ -1,27 +1,23 @@
-{
-  settings,
-  pkgs,
-  lib,
-  ...
-}:
+{ settings, pkgs, lib, ... }:
 let
   user = settings.user.username;
   nixDir = settings.user.nixDir;
   path = "${
-    lib.makeBinPath [
-      pkgs.git
-      pkgs.nix
-      pkgs.nixos-rebuild
-      pkgs.coreutils
-      pkgs.bash
-      pkgs.dunst
-    ]
-  }:/run/current-system/sw/bin";
-in
-{
+      lib.makeBinPath [
+        pkgs.git
+        pkgs.nix
+        pkgs.nixos-rebuild
+        pkgs.coreutils
+        pkgs.bash
+        pkgs.dunst
+      ]
+    }:/run/current-system/sw/bin";
+in {
   # Step 1: Pull and update flake (runs as user)
   systemd.services.nixos-auto-update-fetch = {
     description = "NixOS Auto Update - Fetch";
+    after = [ "network-online.target" ];
+    wants = [ "network-online.target" ];
     serviceConfig = {
       Type = "oneshot";
       User = user;
@@ -65,10 +61,7 @@ in
     serviceConfig = {
       Type = "oneshot";
       User = "root";
-      Environment = [
-        "PATH=${path}"
-        "HOME=/root"
-      ];
+      Environment = [ "PATH=${path}" "HOME=/root" ];
     };
     script = ''
       set -euo pipefail
