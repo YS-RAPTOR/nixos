@@ -15,6 +15,8 @@ in {
       pkgs.slack
       pkgs.teams-for-linux
       pkgs.tilt
+      pkgs-stable.swift
+      pkgs.openjdk
       extra.wombat
 
     ] ++ packages.home {

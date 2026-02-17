@@ -4,6 +4,7 @@
     ./auto-update.nix
     ./bluetooth.nix
     ./boot.nix
+    ./envfs.nix
     ./gpg.nix
     ./hyprland.nix
     ./login.nix
