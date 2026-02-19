@@ -25,7 +25,7 @@
   packages = import ./packages.nix;
 
   ai = {
-    default = "anthropic/claude-opus-4-5";
+    default = "anthropic/claude-opus-4-6";
     defaultSmall = "anthropic/claude-haiku-4-5";
   };
 

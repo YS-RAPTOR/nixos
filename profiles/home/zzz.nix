@@ -25,8 +25,8 @@
   packages = import ./packages.nix;
 
   ai = {
-    default = "github-copilot/gpt-5.2-codex";
-    defaultSmall = "github-copilot/gpt-5.1-codex-mini";
+    default = "openai/gpt-5.3-codex";
+    defaultSmall = "openai/gpt-5.1-codex-mini";
   };
 
   wm = {
