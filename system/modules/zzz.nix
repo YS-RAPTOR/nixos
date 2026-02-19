@@ -4,7 +4,7 @@
     ./auto-update.nix
     ./bluetooth.nix
     ./boot.nix
-    ./gpg.nix
+    ./secrets.nix
     ./hyprland.nix
     ./login.nix
     ./nvidia.nix

@@ -14,7 +14,7 @@ in {
     [
       pkgs.slack
       pkgs.teams-for-linux
-      pkgs.geary
+      pkgs.mailspring
       pkgs.tilt
       pkgs-stable.swift
       pkgs.kotlin

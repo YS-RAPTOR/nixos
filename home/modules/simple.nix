@@ -14,6 +14,10 @@
     udiskie.enable = true;
     hyprpolkitagent.enable = true;
     cliphist.enable = true;
+    gnome-keyring = {
+      enable = true;
+      components = [ "secrets" ];
+    };
 
   };
 

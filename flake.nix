@@ -21,6 +21,7 @@
     let
       profile = "home";
       settings = import ./profiles/${profile}/zzz.nix;
+      overlays = import ./overlays/zzz.nix;
 
       pkgs-unstable = import inputs.nixpkgs-unstable {
         system = settings.system.target;
@@ -28,6 +29,7 @@
           allowUnfree = true;
           allowUnfreePredicate = (_: true);
         };
+        inherit overlays;
       };
       pkgs-stable = import inputs.nixpkgs-stable {
         system = settings.system.target;
@@ -35,6 +37,7 @@
           allowUnfree = true;
           allowUnfreePredicate = (_: true);
         };
+        inherit overlays;
       };
 
       channel = if settings.system.unstable then "unstable" else "stable";
@@ -55,6 +58,7 @@
             ./system/zzz.nix
             stylix.nixosModules.stylix
             home-manager.nixosModules.home-manager
+            { nixpkgs.pkgs = pkgs; }
             {
               home-manager = {
                 users.${settings.user.username} = ./home/zzz.nix;

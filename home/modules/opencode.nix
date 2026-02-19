@@ -1,4 +1,9 @@
 { settings, ... }: {
+  xdg.configFile."opencode/opencode-notifier.json".text = builtins.toJSON {
+    sound = false;
+    notification = true;
+  };
+
   programs.opencode = {
     enable = true;
     settings = {

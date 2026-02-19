@@ -48,14 +48,15 @@
   };
 
   # System package setup
-  nixpkgs.config.allowUnfree = true;
   environment.systemPackages = settings.packages.system {
     pkgs = pkgs;
     pkgs-stable = pkgs-stable;
   };
 
+  # Gnome keyring for secret storage (auto-unlocked via PAM on login)
+  services.gnome.gnome-keyring.enable = true;
+
   # Simple programs and services that are required
-  services.gnome.gnome-online-accounts.enable = true;
   services.udisks2.enable = true;
   programs.fish.enable = true;
   programs.nix-ld.enable = true;
