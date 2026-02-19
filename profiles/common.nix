@@ -26,6 +26,8 @@
       pkgs.hyprlock
       pkgs.dunst
       pkgs.cliphist
+      pkgs.libnotify
+      pkgs.pulseaudio
 
       # Programming Languages
       pkgs.gcc

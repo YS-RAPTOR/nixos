@@ -4,6 +4,7 @@
     settings = {
       theme = "stylix";
       autoupdate = true;
+      plugin = [ "@mohak34/opencode-notifier@latest" ];
       disabled_providers = [ "amazon-bedrock" "github-models" ];
       model = settings.ai.default;
       small_model = settings.ai.defaultSmall;
