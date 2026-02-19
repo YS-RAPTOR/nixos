@@ -14,9 +14,14 @@ in {
     [
       pkgs.slack
       pkgs.teams-for-linux
+      pkgs.geary
       pkgs.tilt
       pkgs-stable.swift
+      pkgs.kotlin
       pkgs.openjdk
+      pkgs.maven
+      pkgs.android-studio
+      pkgs.android-tools
       extra.wombat
 
     ] ++ packages.home {

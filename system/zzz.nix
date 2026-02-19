@@ -58,6 +58,8 @@
   services.udisks2.enable = true;
   programs.fish.enable = true;
   programs.nix-ld.enable = true;
+  services.gvfs.enable = true;
+  services.envfs.enable = true;
 
   # NixOS settings
   nix.settings.experimental-features = [
