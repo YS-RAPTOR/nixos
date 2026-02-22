@@ -1,99 +1,99 @@
 {
-  pkgs,
-  writeShellScriptBin,
-  lib,
-  sources,
-  apps,
-  updateApps,
-  stdShellArgs,
-  wine-stuff,
+    pkgs,
+    writeShellScriptBin,
+    lib,
+    sources,
+    apps,
+    updateApps,
+    stdShellArgs,
+    wine-stuff,
 }:
 rec {
-  createScript =
-    v3: name:
-    let
-      type = if v3 then "v3" else "v2";
-      inherit (wine-stuff."${type}")
-        wine
-        wineboot
-        winetricks
-        wineserver
-        ;
-    in
-    writeShellScriptBin "affinity-${lib.toLower name}" ''
-      ${stdShellArgs}
+    createScript =
+        v3: name:
+        let
+            type = if v3 then "v3" else "v2";
+            inherit (wine-stuff."${type}")
+                wine
+                wineboot
+                winetricks
+                wineserver
+                ;
+        in
+        writeShellScriptBin "affinity-${lib.toLower name}" ''
+            ${stdShellArgs}
 
-      function show_help {
-          cat << EOF
-      Usage: $(basename "$0") [COMMAND] [OPTIONS]
+            function show_help {
+                cat << EOF
+            Usage: $(basename "$0") [COMMAND] [OPTIONS]
 
-      Commands:
-        wine
-        winetricks
-        wineboot
-        wineserver
-        update|repair|install   Update or repair the application
-        help                    Show this
-        (nothing)               Launch Affinity ${name}
-      EOF
-      }
+            Commands:
+              wine
+              winetricks
+              wineboot
+              wineserver
+              update|repair|install   Update or repair the application
+              help                    Show this
+              (nothing)               Launch Affinity ${name}
+            EOF
+            }
 
-      case "${"\${1:-}"}" in
-          -h|--help|help)
-              show_help
-              exit 0
-              ;;
-          wine)
-              shift
-              exec ${lib.getExe wine} "$@"
-              ;;
-          winetricks)
-              shift
-              exec ${lib.getExe winetricks} "$@"
-              ;;
-          wineboot)
-              shift
-              exec ${lib.getExe wineboot} "$@"
-              ;;
-          wineserver)
-              shift
-              exec ${lib.getExe wineserver} "$@"
-              ;;
-          update|repair|install)
-              shift
-              exec ${lib.getExe updateApps.${lib.toLower name}} "$@"
-              ;;
-          *)
-              exec ${lib.getExe apps.${lib.toLower name}} "$@"
-              ;;
-      esac
-    '';
+            case "${"\${1:-}"}" in
+                -h|--help|help)
+                    show_help
+                    exit 0
+                    ;;
+                wine)
+                    shift
+                    exec ${lib.getExe wine} "$@"
+                    ;;
+                winetricks)
+                    shift
+                    exec ${lib.getExe winetricks} "$@"
+                    ;;
+                wineboot)
+                    shift
+                    exec ${lib.getExe wineboot} "$@"
+                    ;;
+                wineserver)
+                    shift
+                    exec ${lib.getExe wineserver} "$@"
+                    ;;
+                update|repair|install)
+                    shift
+                    exec ${lib.getExe updateApps.${lib.toLower name}} "$@"
+                    ;;
+                *)
+                    exec ${lib.getExe apps.${lib.toLower name}} "$@"
+                    ;;
+            esac
+        '';
 
-  createUnifiedPackage =
-    name:
-    let
-      v3 = name == "v3";
+    createUnifiedPackage =
+        name:
+        let
+            v3 = name == "v3";
 
-      app = apps.${lib.toLower name};
-      pkg = createScript v3 name;
+            app = apps.${lib.toLower name};
+            pkg = createScript v3 name;
 
-      version = if v3 then "" else sources._version;
-      postfix = if v3 then "" else "-2";
-    in
-    pkgs.symlinkJoin {
-      name = "Affinity ${name} ${version}";
-      pname = "affinity-${lib.toLower name}${postfix}";
-      # order is important because the script and the app both use the same
-      # binary name...
-      paths = [
-        pkg
-        app
-      ];
-      meta = {
-        description = "Affinity ${name} ${version}";
-        homepage = "https://affinity.serif.com/";
-        platforms = [ "x86_64-linux" ];
-        mainProgram = "affinity-${lib.toLower name}${postfix}";
-      };
-    };
+            version = if v3 then "" else sources._version;
+            postfix = if v3 then "" else "-2";
+        in
+        pkgs.symlinkJoin {
+            name = "Affinity ${name} ${version}";
+            pname = "affinity-${lib.toLower name}${postfix}";
+            # order is important because the script and the app both use the same
+            # binary name...
+            paths = [
+                pkg
+                app
+            ];
+            meta = {
+                description = "Affinity ${name} ${version}";
+                homepage = "https://affinity.serif.com/";
+                platforms = [ "x86_64-linux" ];
+                mainProgram = "affinity-${lib.toLower name}${postfix}";
+            };
+        };
 }

@@ -1,30 +1,30 @@
 {
-  perSystem =
-    {
-      pkgs,
-      affinityPathV3,
-      stdShellArgs,
-      mkGraphicalCheck,
-      mkInstaller,
-      wine-stuff,
-      ...
-    }:
-    let
-      scripts = pkgs.callPackage ./scripts.nix {
-        inherit (wine-stuff.v3) wine;
+    perSystem =
+        {
+            pkgs,
+            affinityPathV3,
+            stdShellArgs,
+            mkGraphicalCheck,
+            mkInstaller,
+            wine-stuff,
+            ...
+        }:
+        let
+            scripts = pkgs.callPackage ./scripts.nix {
+                inherit (wine-stuff.v3) wine;
 
-        inherit
-          affinityPathV3
-          stdShellArgs
-          mkGraphicalCheck
-          mkInstaller
-          ;
-      };
-    in
-    {
-      _module.args = {
-        updateV3 = mkInstaller "v3";
-        directV3 = scripts.createPackage;
-      };
-    };
+                inherit
+                    affinityPathV3
+                    stdShellArgs
+                    mkGraphicalCheck
+                    mkInstaller
+                    ;
+            };
+        in
+        {
+            _module.args = {
+                updateV3 = mkInstaller "v3";
+                directV3 = scripts.createPackage;
+            };
+        };
 }

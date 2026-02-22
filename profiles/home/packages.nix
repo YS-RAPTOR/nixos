@@ -1,31 +1,31 @@
 let
-  common = import ../common.nix;
-  packages = common.packages;
+    common = import ../common.nix;
+    packages = common.packages;
 in
 {
-  system =
-    { pkgs, pkgs-stable }:
-    [
+    system =
+        { pkgs, pkgs-stable }:
+        [
 
-    ]
-    ++ packages.system {
-      pkgs = pkgs;
-      pkgs-stable = pkgs-stable;
-    };
+        ]
+        ++ packages.system {
+            pkgs = pkgs;
+            pkgs-stable = pkgs-stable;
+        };
 
-  home =
-    {
-      pkgs,
-      pkgs-stable,
-      extra,
-    }:
-    [
-      pkgs.vesktop
-      extra.affinity
+    home =
+        {
+            pkgs,
+            pkgs-stable,
+            extra,
+        }:
+        [
+            pkgs.vesktop
+            extra.affinity
 
-    ]
-    ++ packages.home {
-      pkgs = pkgs;
-      pkgs-stable = pkgs-stable;
-    };
+        ]
+        ++ packages.home {
+            pkgs = pkgs;
+            pkgs-stable = pkgs-stable;
+        };
 }
