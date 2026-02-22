@@ -41,6 +41,7 @@
       pkgs.nodejs
       pkgs.uv
       pkgs.python315
+      pkgs.openjdk
     ];
 
     home = { pkgs, pkgs-stable }: [
@@ -71,6 +72,9 @@
       pkgs.imagemagick
       pkgs.ghostscript
       pkgs.tectonic-unwrapped
+      pkgs.maven
+      pkgs.android-studio
+      pkgs.android-tools
     ];
   };
 }

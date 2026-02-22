@@ -12,7 +12,7 @@
         extraEntries = "GRUB_SAVEDEFAULT=true";
       };
     };
-    kernelPackages = pkgs.linuxPackages_latest;
+    kernelPackages = pkgs.linuxPackages;
     supportedFilesystems = [ "ntfs" ];
   };
 }
