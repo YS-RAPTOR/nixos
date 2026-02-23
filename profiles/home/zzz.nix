@@ -31,6 +31,28 @@
 
     wm = {
         dunst.monitorId = 0;
+        workspaces = [
+            {
+                name = "1";
+                key = "1";
+            }
+            {
+                name = "2";
+                key = "2";
+            }
+            {
+                name = "3";
+                key = "3";
+            }
+            {
+                name = "4";
+                key = "4";
+            }
+            {
+                name = "5";
+                key = "5";
+            }
+        ];
         monitors = [
             {
                 name = "eDP-1";
@@ -38,18 +60,7 @@
                 refreshRate = "120.00Hz";
                 position = "auto";
                 scale = "1.6";
-                workspaces = [
-                    1
-                    2
-                    3
-                    4
-                    5
-                    6
-                    7
-                    8
-                    9
-                    10
-                ];
+                workspaceModifier = "";
             }
         ];
     };

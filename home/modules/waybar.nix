@@ -5,6 +5,27 @@ let
     bluetooth = "${settings.user.extraDir}/scripts/wofi-bluetooth.sh";
     colorpicker = "${settings.user.extraDir}/scripts/colorpicker.sh";
     colors = config.lib.stylix.colors;
+    workspaceIcon = "";
+    monitorWorkspaceNames = builtins.listToAttrs (
+        builtins.map (monitor: {
+            name = monitor.name;
+            value = builtins.map (
+                workspace: "${monitor.workspaceModifier}${workspace.name}"
+            ) settings.wm.workspaces;
+        }) settings.wm.monitors
+    );
+    workspaceNamesAll = builtins.concatLists (
+        builtins.map (
+            monitor:
+            builtins.map (workspace: "${monitor.workspaceModifier}${workspace.name}") settings.wm.workspaces
+        ) settings.wm.monitors
+    );
+    workspaceIcons = builtins.listToAttrs (
+        builtins.map (name: {
+            inherit name;
+            value = workspaceIcon;
+        }) workspaceNamesAll
+    );
 
     brightness = import ../../lib/brightness.nix { inherit settings; };
     primaryBacklight = builtins.head settings.hardware.backlights;
@@ -46,19 +67,11 @@ in
 
                 "hyprland/workspaces" = {
                     format = "{icon}";
-                    format-icons = {
-                        "1" = "";
-                        "2" = "";
-                        "3" = "";
-                        "4" = "";
-                        "5" = "";
-                        "6" = "";
+                    format-icons = workspaceIcons // {
                         "active" = "";
-                        "default" = "";
+                        "default" = workspaceIcon;
                     };
-                    persistent-workspaces = {
-                        "*" = builtins.length (builtins.elemAt settings.wm.monitors 0).workspaces;
-                    };
+                    persistent-workspaces = monitorWorkspaceNames;
                 };
 
                 "custom/weather" = {

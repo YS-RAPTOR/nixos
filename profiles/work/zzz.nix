@@ -31,34 +31,55 @@
 
     wm = {
         dunst.monitorId = 1;
+        workspaces = [
+            {
+                name = "1";
+                key = "1";
+            }
+            {
+                name = "2";
+                key = "2";
+            }
+            {
+                name = "3";
+                key = "3";
+            }
+            {
+                name = "4";
+                key = "4";
+            }
+            {
+                name = "5";
+                key = "5";
+            }
+        ];
         monitors = [
             {
+                # Laptop monitor
                 name = "eDP-1";
                 resolution = "1920x1200";
                 refreshRate = "60.00Hz";
                 position = "960x0";
                 scale = "1";
-                workspaces = [
-                    1
-                    2
-                    3
-                    4
-                    5
-                ];
+                workspaceModifier = "";
             }
             {
-                name = "DP-1";
+                # Left Monitor
+                name = "DP-5";
                 resolution = "1920x1080";
                 refreshRate = "74.99Hz";
                 position = "0x-1080";
                 scale = "1";
-                workspaces = [
-                    6
-                    7
-                    8
-                    9
-                    10
-                ];
+                workspaceModifier = "CONTROL";
+            }
+            {
+                # Right Monitor
+                name = "DP-3";
+                resolution = "1920x1080";
+                refreshRate = "74.99Hz";
+                position = "1920x-1080";
+                scale = "1";
+                workspaceModifier = "ALT";
             }
         ];
     };

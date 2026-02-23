@@ -34,12 +34,24 @@ let
         ghostty -e tmux new-session -s "$FINAL" -c "$DIRECTORY"
     '';
 
+    workspaceName = ws: mon: "${mon.workspaceModifier}${ws.name}";
+
     monitorWorkspaceRules =
-        monitors:
+        monitors: workspaces:
         let
-            toRule = m: w: "name:${toString w}, monitor:${m.name}, default:true";
+            toRule = mon: ws: "name:${workspaceName ws mon}, monitor:${mon.name}, default:true";
         in
-        lib.flatten (map (m: map (w: toRule m w) m.workspaces) monitors);
+        lib.flatten (map (mon: map (ws: toRule mon ws) workspaces) monitors);
+
+    workspaceBinds =
+        monitors: workspaces:
+        let
+            bindFor = mon: ws: [
+                "$mainMod ${mon.workspaceModifier}, ${ws.key}, workspace, name:${workspaceName ws mon}"
+                "$mainMod ${mon.workspaceModifier} SHIFT, ${ws.key}, movetoworkspace, name:${workspaceName ws mon}"
+            ];
+        in
+        lib.flatten (map (mon: map (ws: bindFor mon ws) workspaces) monitors);
 
     formatMonitor = m: "${m.name},${m.resolution}@${m.refreshRate},${m.position},${m.scale}";
 
@@ -143,7 +155,7 @@ in
                 "w[tv1], gapsout:0, gapsin:0"
                 "f[1], gapsout:0, gapsin:0"
             ]
-            ++ (monitorWorkspaceRules settings.wm.monitors);
+            ++ (monitorWorkspaceRules settings.wm.monitors settings.wm.workspaces);
 
             windowrule = [
                 {
@@ -260,30 +272,6 @@ in
                 "$mainMod CONTROL, K, resizeactive, 0 -10"
                 "$mainMod CONTROL, J, resizeactive, 0 10"
 
-                # Switch workspaces with mainMod + [0-9]
-                "$mainMod, 1, workspace, 1"
-                "$mainMod, 2, workspace, 2"
-                "$mainMod, 3, workspace, 3"
-                "$mainMod, 4, workspace, 4"
-                "$mainMod, 5, workspace, 5"
-                "$mainMod, 6, workspace, 6"
-                "$mainMod, 7, workspace, 7"
-                "$mainMod, 8, workspace, 8"
-                "$mainMod, 9, workspace, 9"
-                "$mainMod, 0, workspace, 10"
-
-                # Move active window to a workspace with mainMod + SHIFT + [0-9]
-                "$mainMod SHIFT, 1, movetoworkspace, 1"
-                "$mainMod SHIFT, 2, movetoworkspace, 2"
-                "$mainMod SHIFT, 3, movetoworkspace, 3"
-                "$mainMod SHIFT, 4, movetoworkspace, 4"
-                "$mainMod SHIFT, 5, movetoworkspace, 5"
-                "$mainMod SHIFT, 6, movetoworkspace, 6"
-                "$mainMod SHIFT, 7, movetoworkspace, 7"
-                "$mainMod SHIFT, 8, movetoworkspace, 8"
-                "$mainMod SHIFT, 9, movetoworkspace, 9"
-                "$mainMod SHIFT, 0, movetoworkspace, 10"
-
                 # Example special workspace (scratchpad)
                 "$mainMod, S, togglespecialworkspace, magic"
                 "$mainMod CONTROL, S, movetoworkspace, special:magic"
@@ -295,7 +283,8 @@ in
                 # Move/resize windows with mainMod + LMB/RMB and dragging
                 "$mainMod, mouse:272, movewindow"
                 "$mainMod, mouse:273, resizeactive"
-            ];
+            ]
+            ++ (workspaceBinds settings.wm.monitors settings.wm.workspaces);
 
             # Laptop multimedia keys for volume and LCD brightness
             bindel = [
