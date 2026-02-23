@@ -30,7 +30,7 @@
     };
 
     wm = {
-        dunst.monitorId = 1;
+        dunst.monitorId = 2;
         workspaces = [
             {
                 name = "1";
