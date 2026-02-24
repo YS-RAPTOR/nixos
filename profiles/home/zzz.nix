@@ -30,6 +30,7 @@
     };
 
     wm = {
+        startup = pkgs: [ ];
         dunst.monitorId = 0;
         workspaces = [
             {

@@ -65,14 +65,7 @@ in
         settings = {
             env = [ "XDG_CURRENT_DESKTOP,Hyprland" ];
             monitor = map formatMonitor settings.wm.monitors;
-            # exec-once = [
-            #   TODO: Setup workspace rules.
-            #   "vesktop &"
-            #   "bash -c 'sleep 5 && hyprctl dispatch workspace 1 && ghostty' &"
-            #
-            #   TODO: Setup hyprcursor directly
-            #   "hyprctl setcursor Notwaita-White 24 &"
-            # ];
+            exec-once = settings.wm.startup pkgs;
 
             "$terminal" = "${terminal}";
             "$menu" = "wofi --show drun";
