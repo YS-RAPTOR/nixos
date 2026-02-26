@@ -10,7 +10,10 @@
         settings = {
             theme = "stylix";
             autoupdate = true;
-            plugin = [ "@mohak34/opencode-notifier@latest" ];
+            plugin = [
+                "@mohak34/opencode-notifier@latest"
+                "opencode-antigravity-auth@latest"
+            ];
             disabled_providers = [
                 "amazon-bedrock"
                 "github-models"

@@ -36,20 +36,32 @@ let
 
     workspaceName = ws: mon: "${mon.workspaceModifier}${ws.name}";
 
+    workspaceRef =
+        ws: mon:
+        let
+            name = workspaceName ws mon;
+        in
+        if mon.workspaceModifier == "" then name else "name:${name}";
+
     monitorWorkspaceRules =
         monitors: workspaces:
         let
-            toRule = mon: ws: "name:${workspaceName ws mon}, monitor:${mon.name}, default:true";
+            toRule = mon: ws: "${workspaceRef ws mon}, monitor:${mon.name}, default:true";
         in
         lib.flatten (map (mon: map (ws: toRule mon ws) workspaces) monitors);
 
     workspaceBinds =
         monitors: workspaces:
         let
-            bindFor = mon: ws: [
-                "$mainMod ${mon.workspaceModifier}, ${ws.key}, workspace, name:${workspaceName ws mon}"
-                "$mainMod ${mon.workspaceModifier} SHIFT, ${ws.key}, movetoworkspace, name:${workspaceName ws mon}"
-            ];
+            bindFor =
+                mon: ws:
+                let
+                    target = workspaceRef ws mon;
+                in
+                [
+                    "$mainMod ${mon.workspaceModifier}, ${ws.key}, workspace, ${target}"
+                    "$mainMod ${mon.workspaceModifier} SHIFT, ${ws.key}, movetoworkspace, ${target}"
+                ];
         in
         lib.flatten (map (mon: map (ws: bindFor mon ws) workspaces) monitors);
 
