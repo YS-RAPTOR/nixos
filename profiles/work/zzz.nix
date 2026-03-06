@@ -37,12 +37,8 @@
             in
             [
                 (launchToWorkspace "CONTROL1" "vivaldi-stable" "vivaldi")
-                (launchToWorkspace "CONTROL2" "vivaldi-oolio.atlassian"
-                    "vivaldi --app=https://oolio.atlassian.net/jira/software/c/projects/GREEN/boards/1126"
-                )
-                (launchToWorkspace "CONTROL3" "vivaldi-outlook" "vivaldi --app=https://outlook.office.com/mail/0/")
-                "[workspace name:CONTROL4 silent] slack"
-                "[workspace name:CONTROL5 silent] teams-for-linux"
+                "[workspace name:CONTROL2 silent] slack"
+                "[workspace name:CONTROL3 silent] teams-for-linux"
             ];
         dunst.monitorId = 2;
         workspaces = [
@@ -88,7 +84,7 @@
             }
             {
                 # Right Monitor
-                name = "DP-3";
+                name = "HDMI-A-1";
                 resolution = "1920x1080";
                 refreshRate = "74.99Hz";
                 position = "1920x-1080";
