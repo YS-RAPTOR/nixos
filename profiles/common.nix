@@ -47,7 +47,11 @@
             ];
 
         home =
-            { pkgs, pkgs-stable }:
+            {
+                pkgs,
+                pkgs-stable,
+                extra,
+            }:
             [
                 pkgs.yazi
                 pkgs.tmux
@@ -68,7 +72,7 @@
                 pkgs.btop
                 pkgs.pavucontrol
                 pkgs.freeoffice
-                pkgs.opencode
+                extra.opencode
                 pkgs.gh
                 pkgs.lsof
                 pkgs.trash-cli

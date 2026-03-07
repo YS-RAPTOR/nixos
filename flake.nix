@@ -16,12 +16,14 @@
 
         affinity-nix.url = "path:./local-flakes/affinity-nix";
         wombat.url = "path:./local-flakes/wombat";
+        opencode.url = "path:./local-flakes/opencode";
     };
     outputs =
         inputs@{
             self,
             affinity-nix,
             wombat,
+            opencode,
             ...
         }:
         let
@@ -55,6 +57,7 @@
             extra = {
                 affinity = affinity-nix.packages.${settings.system.target}.v3;
                 wombat = wombat.packages.${settings.system.target}.wombat;
+                opencode = opencode.packages.${settings.system.target}.opencode;
             };
         in
         {
