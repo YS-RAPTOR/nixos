@@ -36,61 +36,125 @@
                 launchToWorkspace = import ../../lib/launch-to-workspace.nix { inherit pkgs; };
             in
             [
-                (launchToWorkspace "CONTROL1" "vivaldi-stable" "vivaldi")
-                "[workspace name:CONTROL2 silent] slack"
-                "[workspace name:CONTROL3 silent] teams-for-linux"
+                (launchToWorkspace "C-1" "vivaldi-stable" "vivaldi")
+                "[workspace name:C-2 silent] slack"
+                "[workspace name:C-3 silent] teams-for-linux"
             ];
         dunst.monitorId = 2;
         workspaces = [
             {
-                name = "1";
+                name = "N-1";
                 key = "1";
+                keyModifier = "";
+                monitor = "eDP-1";
+                rule = "name:N-1, monitor:eDP-1, default:true, layout:scrolling";
             }
             {
-                name = "2";
+                name = "N-2";
                 key = "2";
+                keyModifier = "";
+                monitor = "eDP-1";
+                rule = "name:N-2, monitor:eDP-1, default:true, layout:scrolling";
             }
             {
-                name = "3";
+                name = "N-3";
                 key = "3";
+                keyModifier = "";
+                monitor = "eDP-1";
+                rule = "name:N-3, monitor:eDP-1, default:true, layout:scrolling";
             }
             {
-                name = "4";
+                name = "N-4";
                 key = "4";
+                keyModifier = "";
+                monitor = "eDP-1";
+                rule = "name:N-4, monitor:eDP-1, default:true";
             }
             {
-                name = "5";
+                name = "N-5";
                 key = "5";
+                keyModifier = "";
+                monitor = "eDP-1";
+                rule = "name:N-5, monitor:eDP-1, default:true";
+            }
+            {
+                name = "C-1";
+                key = "1";
+                keyModifier = "CONTROL";
+                monitor = "DP-5";
+                rule = "name:C-1, monitor:DP-5, default:true";
+            }
+            {
+                name = "C-2";
+                key = "2";
+                keyModifier = "CONTROL";
+                monitor = "DP-5";
+                rule = "name:C-2, monitor:DP-5, default:true";
+            }
+            {
+                name = "C-3";
+                key = "3";
+                keyModifier = "CONTROL";
+                monitor = "DP-5";
+                rule = "name:C-3, monitor:DP-5, default:true";
+            }
+            {
+                name = "C-4";
+                key = "4";
+                keyModifier = "CONTROL";
+                monitor = "DP-5";
+                rule = "name:C-4, monitor:DP-5, default:true";
+            }
+            {
+                name = "C-5";
+                key = "5";
+                keyModifier = "CONTROL";
+                monitor = "DP-5";
+                rule = "name:C-5, monitor:DP-5, default:true";
+            }
+            {
+                name = "A-1";
+                key = "1";
+                keyModifier = "ALT";
+                monitor = "HDMI-A-1";
+                rule = "name:A-1, monitor:HDMI-A-1, default:true";
+            }
+            {
+                name = "A-2";
+                key = "2";
+                keyModifier = "ALT";
+                monitor = "HDMI-A-1";
+                rule = "name:A-2, monitor:HDMI-A-1, default:true";
+            }
+            {
+                name = "A-3";
+                key = "3";
+                keyModifier = "ALT";
+                monitor = "HDMI-A-1";
+                rule = "name:A-3, monitor:HDMI-A-1, default:true";
+            }
+            {
+                name = "A-4";
+                key = "4";
+                keyModifier = "ALT";
+                monitor = "HDMI-A-1";
+                rule = "name:A-4, monitor:HDMI-A-1, default:true";
+            }
+            {
+                name = "A-5";
+                key = "5";
+                keyModifier = "ALT";
+                monitor = "HDMI-A-1";
+                rule = "name:A-5, monitor:HDMI-A-1, default:true";
             }
         ];
         monitors = [
-            {
-                # Laptop monitor
-                name = "eDP-1";
-                resolution = "1920x1200";
-                refreshRate = "60.00Hz";
-                position = "960x0";
-                scale = "1";
-                workspaceModifier = "";
-            }
-            {
-                # Left Monitor
-                name = "DP-5";
-                resolution = "1920x1080";
-                refreshRate = "74.99Hz";
-                position = "0x-1080";
-                scale = "1";
-                workspaceModifier = "CONTROL";
-            }
-            {
-                # Right Monitor
-                name = "HDMI-A-1";
-                resolution = "1920x1080";
-                refreshRate = "74.99Hz";
-                position = "1920x-1080";
-                scale = "1";
-                workspaceModifier = "ALT";
-            }
+            # Laptop monitor
+            "eDP-1,1920x1200@60.00Hz,960x0,1"
+            # Left monitor
+            "DP-5,1920x1080@74.99Hz,0x-1080,1"
+            # Right monitor
+            "HDMI-A-1,1920x1080@74.99Hz,1920x-1080,1"
         ];
     };
 

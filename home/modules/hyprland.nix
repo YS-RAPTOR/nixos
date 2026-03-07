@@ -34,38 +34,37 @@ let
         ghostty -e tmux new-session -s "$FINAL" -c "$DIRECTORY"
     '';
 
-    workspaceName = ws: mon: "${mon.workspaceModifier}${ws.name}";
+    toggleScrollColsize = pkgs.writeShellScript "toggle-scroll-colsize" ''
+        LAYOUT=$(hyprctl activeworkspace -j | jq -r '.tiledLayout')
 
-    workspaceRef =
-        ws: mon:
-        let
-            name = workspaceName ws mon;
-        in
-        if mon.workspaceModifier == "" then name else "name:${name}";
+        if [ "$LAYOUT" != "scrolling" ]; then
+            hyprctl dispatch fullscreen
+            exit 0
+        fi
 
-    monitorWorkspaceRules =
-        monitors: workspaces:
-        let
-            toRule = mon: ws: "${workspaceRef ws mon}, monitor:${mon.name}, default:true";
-        in
-        lib.flatten (map (mon: map (ws: toRule mon ws) workspaces) monitors);
+        MONITOR=$(hyprctl activeworkspace -j | jq -r '.monitor')
+        MONITOR_WIDTH=$(hyprctl monitors -j | jq -r ".[] | select(.name == \"$MONITOR\") | (.width / .scale | floor)")
+        WINDOW_WIDTH=$(hyprctl activewindow -j | jq -r '.size[0]')
+
+        if [ -z "$MONITOR_WIDTH" ] || [ "$MONITOR_WIDTH" -le 0 ] || [ -z "$WINDOW_WIDTH" ]; then
+            exit 0
+        fi
+
+        if [ $((WINDOW_WIDTH * 100)) -ge $((MONITOR_WIDTH * 75)) ]; then
+            hyprctl dispatch layoutmsg "colresize 0.5"
+        else
+            hyprctl dispatch layoutmsg "colresize 1.0"
+        fi
+    '';
 
     workspaceBinds =
-        monitors: workspaces:
-        let
-            bindFor =
-                mon: ws:
-                let
-                    target = workspaceRef ws mon;
-                in
-                [
-                    "$mainMod ${mon.workspaceModifier}, ${ws.key}, workspace, ${target}"
-                    "$mainMod ${mon.workspaceModifier} SHIFT, ${ws.key}, movetoworkspace, ${target}"
-                ];
-        in
-        lib.flatten (map (mon: map (ws: bindFor mon ws) workspaces) monitors);
-
-    formatMonitor = m: "${m.name},${m.resolution}@${m.refreshRate},${m.position},${m.scale}";
+        workspaces:
+        lib.flatten (
+            map (ws: [
+                "$mainMod ${ws.keyModifier}, ${ws.key}, workspace, name:${ws.name}"
+                "$mainMod ${ws.keyModifier} SHIFT, ${ws.key}, movetoworkspace, name:${ws.name}"
+            ]) workspaces
+        );
 
 in
 {
@@ -76,10 +75,11 @@ in
 
         settings = {
             env = [ "XDG_CURRENT_DESKTOP,Hyprland" ];
-            monitor = map formatMonitor settings.wm.monitors;
+            monitor = settings.wm.monitors;
             exec-once = settings.wm.startup pkgs;
 
             "$terminal" = "${terminal}";
+            "$toggleScrollColsize" = "${toggleScrollColsize}";
             "$menu" = "wofi --show drun";
             "$browser" = "vivaldi";
             "$fileManager" = "nautilus";
@@ -160,7 +160,7 @@ in
                 "w[tv1], gapsout:0, gapsin:0"
                 "f[1], gapsout:0, gapsin:0"
             ]
-            ++ (monitorWorkspaceRules settings.wm.monitors settings.wm.workspaces);
+            ++ (builtins.map (ws: ws.rule) settings.wm.workspaces);
 
             windowrule = [
                 {
@@ -240,16 +240,21 @@ in
             "$mainMod" = "SUPER";
 
             bind = [
-                "$mainMod, Q, exec, $terminal"
                 "$mainMod, W, killactive,"
-                "$mainMod, M, exit,"
+                "$mainMod, Q, exec, $terminal"
                 "$mainMod, E, exec, $fileManager"
-                "$mainMod, F, togglefloating,"
                 "$mainMod, R, exec, $menu"
                 "$mainMod, D, exec, $browser"
                 "$mainMod SHIFT, D, exec, $browser -incognito"
-                "$mainMod, P, pseudo,"
-                "$mainMod, A, togglesplit,"
+
+                "$mainMod SHIFT, P, pseudo,"
+                "$mainMod SHIFT, A, togglesplit,"
+
+                "$mainMod, T, togglefloating,"
+                "$mainMod, F, exec, $toggleScrollColsize"
+                "$mainMod, A, fullscreen,"
+                "$mainMod, G, layoutmsg, colresize +conf"
+                "$mainMod, P, layoutmsg, promote"
 
                 # Screenshot a monitor
                 "$mainMod SHIFT, S, exec, hyprshot -z -m output"
@@ -284,12 +289,8 @@ in
                 # Scroll through existing workspaces with mainMod + scroll
                 "$mainMod, mouse_down, workspace, e+1"
                 "$mainMod, mouse_up, workspace, e-1"
-
-                # Move/resize windows with mainMod + LMB/RMB and dragging
-                "$mainMod, mouse:272, movewindow"
-                "$mainMod, mouse:273, resizeactive"
             ]
-            ++ (workspaceBinds settings.wm.monitors settings.wm.workspaces);
+            ++ (workspaceBinds settings.wm.workspaces);
 
             # Laptop multimedia keys for volume and LCD brightness
             bindel = [
@@ -310,6 +311,7 @@ in
             ];
 
             bindm = [
+                # Move/resize windows with mainMod + LMB/RMB and dragging
                 "$mainMod, mouse:272, movewindow"
                 "$mainMod, mouse:273, resizewindow"
             ];

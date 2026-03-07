@@ -32,5 +32,6 @@ in
         ++ packages.home {
             pkgs = pkgs;
             pkgs-stable = pkgs-stable;
+            extra = extra;
         };
 }

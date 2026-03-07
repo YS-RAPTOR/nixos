@@ -25,8 +25,8 @@
     packages = import ./packages.nix;
 
     ai = {
-        default = "openai/gpt-5.3-codex";
-        defaultSmall = "openai/gpt-5.1-codex-mini";
+        default = "openai/gpt-5.4";
+        defaultSmall = "openai/gpt-5.4";
     };
 
     wm = {
@@ -34,35 +34,43 @@
         dunst.monitorId = 0;
         workspaces = [
             {
-                name = "1";
+                name = "N-1";
                 key = "1";
+                keyModifier = "";
+                monitor = "eDP-1";
+                rule = "name:N-1, monitor:eDP-1, default:true, layout:scrolling";
             }
             {
-                name = "2";
+                name = "N-2";
                 key = "2";
+                keyModifier = "";
+                monitor = "eDP-1";
+                rule = "name:N-2, monitor:eDP-1, default:true, layout:scrolling";
             }
             {
-                name = "3";
+                name = "N-3";
                 key = "3";
+                keyModifier = "";
+                monitor = "eDP-1";
+                rule = "name:N-3, monitor:eDP-1, default:true, layout:scrolling";
             }
             {
-                name = "4";
+                name = "N-4";
                 key = "4";
+                keyModifier = "";
+                monitor = "eDP-1";
+                rule = "name:N-4, monitor:eDP-1, default:true";
             }
             {
-                name = "5";
+                name = "N-5";
                 key = "5";
+                keyModifier = "";
+                monitor = "eDP-1";
+                rule = "name:N-5, monitor:eDP-1, default:true";
             }
         ];
         monitors = [
-            {
-                name = "eDP-1";
-                resolution = "3200x2000";
-                refreshRate = "120.00Hz";
-                position = "auto";
-                scale = "1.6";
-                workspaceModifier = "";
-            }
+            "eDP-1,3200x2000@120.00Hz,auto,1.6"
         ];
     };
 

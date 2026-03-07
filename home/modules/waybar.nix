@@ -6,20 +6,16 @@ let
     colorpicker = "${settings.user.extraDir}/scripts/colorpicker.sh";
     colors = config.lib.stylix.colors;
     workspaceIcon = "";
-    monitorWorkspaceNames = builtins.listToAttrs (
-        builtins.map (monitor: {
-            name = monitor.name;
-            value = builtins.map (
-                workspace: "${monitor.workspaceModifier}${workspace.name}"
-            ) settings.wm.workspaces;
-        }) settings.wm.monitors
-    );
-    workspaceNamesAll = builtins.concatLists (
-        builtins.map (
-            monitor:
-            builtins.map (workspace: "${monitor.workspaceModifier}${workspace.name}") settings.wm.workspaces
-        ) settings.wm.monitors
-    );
+    monitorWorkspaceNames = builtins.foldl' (
+        acc: workspace:
+        acc
+        // {
+            "${workspace.monitor}" =
+                (if builtins.hasAttr workspace.monitor acc then builtins.getAttr workspace.monitor acc else [ ])
+                ++ [ workspace.name ];
+        }
+    ) { } settings.wm.workspaces;
+    workspaceNamesAll = builtins.map (workspace: workspace.name) settings.wm.workspaces;
     workspaceIcons = builtins.listToAttrs (
         builtins.map (name: {
             inherit name;
