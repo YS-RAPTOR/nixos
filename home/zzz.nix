@@ -35,6 +35,8 @@
         XDG_PICTURES_DIR = "$HOME/Pictures";
         XDG_VIDEOS_DIR = "$HOME/Videos";
         XDG_PUBLICSHARE_DIR = "$HOME/Public";
+        ANDROID_HOME = "$HOME/Android/Sdk";
+        ANDROID_SDK_ROOT = "$HOME/Android/Sdk";
     };
 
     xdg = {
