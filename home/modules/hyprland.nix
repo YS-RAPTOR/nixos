@@ -34,6 +34,17 @@ let
         ghostty -e tmux new-session -s "$FINAL" -c "$DIRECTORY"
     '';
 
+    scrollOrDefault = pkgs.writeShellScript "scroll-or-default" ''
+        LAYOUT=$(hyprctl activeworkspace -j | jq -r '.tiledLayout')
+        if [ "$LAYOUT" = "scrolling" ]; then
+            hyprctl dispatch $1
+        else
+            if [ -n "$2" ]; then
+                hyprctl dispatch $2
+            fi
+        fi
+    '';
+
     toggleScrollColsize = pkgs.writeShellScript "toggle-scroll-colsize" ''
         LAYOUT=$(hyprctl activeworkspace -j | jq -r '.tiledLayout')
 
@@ -79,6 +90,7 @@ in
             exec-once = settings.wm.startup pkgs;
 
             "$terminal" = "${terminal}";
+            "$scrollOrDefault" = "${scrollOrDefault}";
             "$toggleScrollColsize" = "${toggleScrollColsize}";
             "$menu" = "wofi --show drun";
             "$browser" = "vivaldi";
@@ -230,7 +242,13 @@ in
                 };
             };
 
-            # gestures = { workspace_swipe = false; };
+            gesture = [
+                "3, up, dispatcher, workspace, e-1"
+                "3, down, dispatcher, workspace, e+1"
+                "3, right, dispatcher, exec, $scrollOrDefault 'layoutmsg focus l' ''"
+                "3, left, dispatcher, exec, $scrollOrDefault 'layoutmsg focus r' ''"
+                "4, swipe, move"
+            ];
 
             device = {
                 name = "epic-mouse-v1";
@@ -265,16 +283,16 @@ in
                 "SHIFT, PRINT, exec, hyprshot -z -m region"
 
                 # Move focus with mainMod + arrow keys
-                "$mainMod, H, movefocus, l"
-                "$mainMod, L, movefocus, r"
-                "$mainMod, K, movefocus, u"
-                "$mainMod, J, movefocus, d"
+                "$mainMod, H, exec, $scrollOrDefault 'layoutmsg focus l' 'movefocus l'"
+                "$mainMod, L, exec, $scrollOrDefault 'layoutmsg focus r' 'movefocus r'"
+                "$mainMod, K, exec, $scrollOrDefault 'layoutmsg focus u' 'movefocus u'"
+                "$mainMod, J, exec, $scrollOrDefault 'layoutmsg focus d' 'movefocus d'"
 
                 # Swap Window
-                "$mainMod SHIFT, H, swapwindow, l"
-                "$mainMod SHIFT, L, swapwindow, r"
-                "$mainMod SHIFT, K, swapwindow, u"
-                "$mainMod SHIFT, J, swapwindow, d"
+                "$mainMod SHIFT, H, exec, $scrollOrDefault 'layoutmsg swapcol l' 'swapwindow l'"
+                "$mainMod SHIFT, L, exec, $scrollOrDefault 'layoutmsg swapcol r' 'swapwindow r'"
+                "$mainMod SHIFT, K, exec, $scrollOrDefault 'swapwindow u' 'swapwindow u'"
+                "$mainMod SHIFT, J, exec, $scrollOrDefault 'swapwindow d' 'swapwindow d'"
 
                 # Resize Window
                 "$mainMod CONTROL, H, resizeactive, -10 0"
@@ -285,10 +303,6 @@ in
                 # Example special workspace (scratchpad)
                 "$mainMod, S, togglespecialworkspace, magic"
                 "$mainMod CONTROL, S, movetoworkspace, special:magic"
-
-                # Scroll through existing workspaces with mainMod + scroll
-                "$mainMod, mouse_down, workspace, e+1"
-                "$mainMod, mouse_up, workspace, e-1"
             ]
             ++ (workspaceBinds settings.wm.workspaces);
 
