@@ -25,8 +25,8 @@
     packages = import ./packages.nix;
 
     ai = {
-        default = "anthropic/claude-opus-4-6";
-        defaultSmall = "anthropic/claude-haiku-4-5";
+        default = "github-copilot/gpt-5.4";
+        defaultSmall = "github-copilot/gpt-5.4-mini";
     };
 
     wm = {
