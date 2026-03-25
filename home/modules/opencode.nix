@@ -38,8 +38,23 @@
                     "" = "allow";
                 };
             };
+            agent = {
+                build-ask = {
+                    description = "Primary build-style agent that asks before using tools";
+                    mode = "primary";
+                    model = settings.ai.default;
+                    permission = {
+                        edit = "ask";
+                        task = {
+                            "*" = "ask";
+                        };
+                        bash = {
+                            "*" = "ask";
+                        };
+                    };
+                };
+            };
             keybinds = {
-                leader = "ctrl+f";
                 messages_half_page_down = "ctrl+d";
                 messages_half_page_up = "ctrl+u";
                 messages_last = "alt+g";

@@ -72,6 +72,9 @@
                 pkgs.btop
                 pkgs.pavucontrol
                 pkgs.freeoffice
+                extra.t3code
+                pkgs.claude-code
+                pkgs.codex
                 extra.opencode
                 pkgs.gh
                 pkgs.lsof

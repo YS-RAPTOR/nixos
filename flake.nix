@@ -17,6 +17,7 @@
         affinity-nix.url = "path:./local-flakes/affinity-nix";
         wombat.url = "path:./local-flakes/wombat";
         opencode.url = "path:./local-flakes/opencode";
+        t3code.url = "path:./local-flakes/t3code";
     };
     outputs =
         inputs@{
@@ -24,6 +25,7 @@
             affinity-nix,
             wombat,
             opencode,
+            t3code,
             ...
         }:
         let
@@ -58,6 +60,7 @@
                 affinity = affinity-nix.packages.${settings.system.target}.v3;
                 wombat = wombat.packages.${settings.system.target}.wombat;
                 opencode = opencode.packages.${settings.system.target}.opencode;
+                t3code = t3code.packages.${settings.system.target}.t3code;
             };
         in
         {
