@@ -7,8 +7,15 @@
 
     programs.opencode = {
         enable = true;
-        settings = {
+        tui = {
+            keybinds = {
+                messages_half_page_down = "ctrl+d";
+                messages_half_page_up = "ctrl+u";
+                messages_last = "alt+g";
+            };
             theme = "stylix";
+        };
+        settings = {
             autoupdate = true;
             plugin = [
                 "@mohak34/opencode-notifier@latest"
@@ -53,11 +60,6 @@
                         };
                     };
                 };
-            };
-            keybinds = {
-                messages_half_page_down = "ctrl+d";
-                messages_half_page_up = "ctrl+u";
-                messages_last = "alt+g";
             };
             instructions = [
                 "CONTRIBUTING.md"

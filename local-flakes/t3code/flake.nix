@@ -19,18 +19,31 @@
                 let
                     pkgs = nixpkgs.legacyPackages.${system};
 
-                    latestRelease = builtins.fromJSON (
+                    releases = builtins.fromJSON (
                         builtins.readFile (
                             builtins.fetchurl {
-                                url = "https://api.github.com/repos/pingdotgg/t3code/releases/latest";
+                                url = "https://api.github.com/repos/pingdotgg/t3code/releases";
                             }
                         )
                     );
 
-                    version = builtins.replaceStrings [ "v" ] [ "" ] latestRelease.tag_name;
+                    nightlyReleases = builtins.filter (
+                        release: pkgs.lib.hasPrefix "nightly-" release.tag_name
+                    ) releases;
+
+                    nightlyRelease = builtins.foldl' (
+                        latest: release:
+                        if latest == null || release.published_at > latest.published_at then
+                            release
+                        else
+                            latest
+                    ) null nightlyReleases;
+
+                    version = builtins.replaceStrings [ "nightly-v" ] [ "" ] nightlyRelease.tag_name;
+                    tag = nightlyRelease.tag_name;
 
                     src = builtins.fetchurl {
-                        url = "https://github.com/pingdotgg/t3code/releases/download/v${version}/T3-Code-${version}-x86_64.AppImage";
+                        url = "https://github.com/pingdotgg/t3code/releases/download/${tag}/T3-Code-${version}-x86_64.AppImage";
                     };
                 in
                 pkgs.appimageTools.wrapType2 {
@@ -45,8 +58,25 @@
                             };
                         in
                         ''
-                            install -m 444 -D ${appimageContents}/t3-code-desktop.desktop $out/share/applications/t3-code.desktop
-                            substituteInPlace $out/share/applications/t3-code.desktop \
+                            desktopFile=""
+
+                            for candidate in \
+                                ${appimageContents}/*.desktop \
+                                ${appimageContents}/usr/share/applications/*.desktop
+                            do
+                                if [ -f "$candidate" ]; then
+                                    desktopFile="$candidate"
+                                    break
+                                fi
+                            done
+
+                            if [ -z "$desktopFile" ]; then
+                                echo "No desktop file found in extracted AppImage" >&2
+                                exit 1
+                            fi
+
+                            install -m 444 -D "$desktopFile" $out/share/applications/t3code.desktop
+                            substituteInPlace $out/share/applications/t3code.desktop \
                                 --replace-warn 'Exec=AppRun --no-sandbox' 'Exec=t3code'
                             cp -r ${appimageContents}/usr/share/icons $out/share/icons
                         '';
