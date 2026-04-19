@@ -152,9 +152,9 @@
             # Laptop monitor
             "eDP-1,1920x1200@60.00Hz,960x0,1"
             # Left monitor
-            "DP-5,1920x1080@74.99Hz,0x-1080,1"
+            "DP-5,1920x1080@60Hz,0x-1080,1"
             # Right monitor
-            "HDMI-A-1,1920x1080@74.99Hz,1920x-1080,1"
+            "HDMI-A-1,1920x1080@60Hz,1920x-1080,1"
         ];
     };
 

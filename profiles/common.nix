@@ -73,7 +73,7 @@
                 pkgs.pavucontrol
                 pkgs.freeoffice
                 extra.t3code
-                pkgs.claude-code
+                extra.claude-code
                 pkgs.codex
                 extra.opencode
                 pkgs.gh

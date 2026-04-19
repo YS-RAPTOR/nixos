@@ -18,6 +18,7 @@
         wombat.url = "path:./local-flakes/wombat";
         opencode.url = "path:./local-flakes/opencode";
         t3code.url = "path:./local-flakes/t3code";
+        claude-code.url = "path:./local-flakes/claude-code";
     };
     outputs =
         inputs@{
@@ -26,6 +27,7 @@
             wombat,
             opencode,
             t3code,
+            claude-code,
             ...
         }:
         let
@@ -61,6 +63,7 @@
                 wombat = wombat.packages.${settings.system.target}.wombat;
                 opencode = opencode.packages.${settings.system.target}.opencode;
                 t3code = t3code.packages.${settings.system.target}.t3code;
+                claude-code = claude-code.packages.${settings.system.target}.claude-code;
             };
         in
         {
