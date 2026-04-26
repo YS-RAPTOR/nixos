@@ -21,6 +21,7 @@ in
         }:
         [
             pkgs.vesktop
+            pkgs.codex
             extra.affinity
 
         ]
