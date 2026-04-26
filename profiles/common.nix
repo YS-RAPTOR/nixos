@@ -10,6 +10,7 @@
                 pkgs.vivaldi
                 pkgs.wofi
                 pkgs.ghostty
+                pkgs.kitty
                 pkgs.git
                 pkgs.fish
                 pkgs.bash

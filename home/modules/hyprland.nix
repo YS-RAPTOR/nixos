@@ -31,7 +31,7 @@ let
             fi
             i=$((i + 1))
         done
-        ghostty -e tmux new-session -s "$FINAL" -c "$DIRECTORY"
+        ${pkgs.ghostty}/bin/ghostty -e tmux new-session -s "$FINAL" -c "$DIRECTORY"
     '';
 
     scrollOrDefault = pkgs.writeShellScript "scroll-or-default" ''

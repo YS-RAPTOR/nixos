@@ -28,9 +28,18 @@ WHITELIST_PATHS = {
     "browser.window_placement",
     # Extension keyboard shortcuts (not extension data)
     "extensions.commands",
-    # Search engine settings (nicknames/keywords, custom engines, default selection)
+}
+
+# Full preference paths to exclude even when a parent path is whitelisted.
+SENSITIVE_PATH_BLACKLIST = {
+    # DevTools state that can expose local development URLs.
+    "devtools.preferences.resources-last-selected-element-path",
+    # Search provider IDs/profile metadata; not needed for portable UI settings.
     "default_search_provider",
     "default_search_provider_data",
+    # Local filesystem paths and saved location presets.
+    "vivaldi.appearance.css_ui_mods_directory",
+    "vivaldi.geolocation",
 }
 
 # Vivaldi-specific settings to extract (under "vivaldi" key)
@@ -100,6 +109,9 @@ VIVALDI_BLACKLIST = {
     "panels.web",
     # Reader/RSS feeds (contain URLs)
     "reader",
+    # Local filesystem paths and saved location presets
+    "appearance.css_ui_mods_directory",
+    "geolocation",
 }
 
 # Command chain names to filter out (case-insensitive)
@@ -139,6 +151,37 @@ def is_blacklisted(path):
         if path == blacklisted or path.startswith(blacklisted + "."):
             return True
     return False
+
+
+def is_sensitive_path(path):
+    """Check if a full preference path is sensitive/local-only."""
+    for blacklisted in SENSITIVE_PATH_BLACKLIST:
+        if path == blacklisted or path.startswith(blacklisted + "."):
+            return True
+    return False
+
+
+def filter_sensitive_paths(obj, parent_path=""):
+    """Recursively filter sensitive full preference paths from dicts."""
+    if not isinstance(obj, dict):
+        return deepcopy(obj)
+
+    filtered = {}
+    for key, value in obj.items():
+        current_path = f"{parent_path}.{key}" if parent_path else key
+
+        if is_sensitive_path(current_path):
+            print(f"  Skipped (sensitive): {current_path}")
+            continue
+
+        if isinstance(value, dict):
+            filtered_child = filter_sensitive_paths(value, current_path)
+            if filtered_child:
+                filtered[key] = filtered_child
+        else:
+            filtered[key] = deepcopy(value)
+
+    return filtered
 
 
 def filter_command_chains(chained_commands):
@@ -233,19 +276,25 @@ def extract_settings(preferences):
     for key in WHITELIST_TOP_LEVEL:
         if key in preferences:
             print(f"  Extracted: {key}")
-            extracted[key] = deepcopy(preferences[key])
+            extracted[key] = filter_sensitive_paths(preferences[key], key)
 
     # Extract specific paths
     for path in WHITELIST_PATHS:
+        if is_sensitive_path(path):
+            print(f"  Skipped (sensitive): {path}")
+            continue
+
         value = get_nested_value(preferences, path)
         if value is not None:
             print(f"  Extracted: {path}")
-            set_nested_value(extracted, path, deepcopy(value))
+            set_nested_value(extracted, path, filter_sensitive_paths(value, path))
 
     # Extract vivaldi settings
     if "vivaldi" in preferences:
         print("  Extracting vivaldi settings...")
-        extracted["vivaldi"] = extract_vivaldi_settings(preferences["vivaldi"])
+        extracted["vivaldi"] = filter_sensitive_paths(
+            extract_vivaldi_settings(preferences["vivaldi"]), "vivaldi"
+        )
 
     return extracted
 

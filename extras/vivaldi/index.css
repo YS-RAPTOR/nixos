@@ -1,52 +1,10 @@
-/* Adding padding and border around content */
-
-#browser:not(.fullscreen) #webpage-stack {
-    border-radius: 5px !important;
-}
-
-#browser:not(.fullscreen) #webview-container {
-    padding: 14px;
-    background-color: var(--colorTabBar, black);
-}
-
-/* Popups Broken */
-
-#tabs-container>.toolbar .UrlBar-AddressField .button-popup-center {
-    right: var(--edgeMargin) !important;
-    left: unset;
-}
-
-#tabs-container>.toolbar .UrlBar-AddressField .button-popup-center::before {
-    right: calc((var(--buttonWidth) / 2) - 6px - var(--edgeMargin));
-    left: unset;
-}
-
-/* Tiltlebar styling */
-
-#header {
-    position: absolute;
-    right: 0px;
-    width: 80vw;
-    z-index: 3;
-    height: 12px;
-    min-height: 10px !important;
-    background-color: transparent !important;
-    box-shadow: none !important;
-}
-
-#titlebar * {
-    display: none !important;
-}
-
 #titlebar .window-buttongroup {
     display: flex !important;
     gap: 1.5px;
-    top: 0px !important;
 }
 
 #titlebar .window-buttongroup button {
     display: inline-block !important;
-    height: 12px !important;
     width: 50px !important;
     margin: 0px !important;
 }
@@ -76,49 +34,12 @@
     background-color: #f87171 !important;
 }
 
-/* Sidebar General Styling */
-
-#main>.inner>.tabbar-wrapper {
-    width: 14px;
-    position: absolute;
-    top: 0;
-    left: 0;
-    z-index: 3;
-    transition: width 0.25s cubic-bezier(0.33, 1, 0.68, 1);
-    /* snappy curve */
-    overflow: hidden;
-    padding-left: 14px;
-    background-color: var(--colorTabBar, black);
+#panels-container {
+    width: 0px !important;
 }
 
-#tabs-tabbar-container {
-    width: 100% !important;
-    opacity: 0;
-    transition: opacity 0.3s ease;
-}
-
-#main>.inner>.tabbar-wrapper:is( :hover,
-    :has(:hover),
-    :has(:active),
-    :focus-within,
-    :has([aria-expanded="true"])) {
-    width: 500px;
-}
-
-#main>.inner>.tabbar-wrapper:is( :hover,
-    :has(:hover),
-    :has(:active),
-    :focus-within,
-    :has([aria-expanded="true"])) #tabs-tabbar-container {
-    opacity: 1;
-}
-
-#browser:has(.extension-popup, .tooltip-item) #main>.inner>.tabbar-wrapper {
-    width: 500px;
-}
-
-#browser:has(.extension-popup, .tooltip-item) #main>.inner>.tabbar-wrapper #tabs-tabbar-container {
-    opacity: 1;
+#panels-container .panel-group {
+    right: 0px !important;
 }
 
 /* Sidebar Top Styling */
@@ -164,14 +85,4 @@
 
 #tabs-container>.resize .tab:is(.active) {
     background-color: rgba(255, 255, 255, 0.1) !important;
-}
-
-/* Panel */
-
-#panels-container {
-    width: 0px !important;
-}
-
-#panels-container .panel-group {
-    right: 0px !important;
 }

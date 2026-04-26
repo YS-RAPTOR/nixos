@@ -22,6 +22,8 @@ in
         [
             pkgs.vesktop
             pkgs.codex
+            pkgs.openvpn
+            pkgs.openvpn3
             extra.affinity
 
         ]

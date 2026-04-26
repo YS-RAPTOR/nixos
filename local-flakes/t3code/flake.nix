@@ -19,28 +19,35 @@
                 let
                     pkgs = nixpkgs.legacyPackages.${system};
 
-                    releases = builtins.fromJSON (
+                    releasesAtom = builtins.replaceStrings [ "\n" "\r" ] [ "" "" ] (
                         builtins.readFile (
                             builtins.fetchurl {
-                                url = "https://api.github.com/repos/pingdotgg/t3code/releases";
+                                url = "https://github.com/pingdotgg/t3code/releases.atom";
                             }
                         )
                     );
 
-                    nightlyReleases = builtins.filter (
-                        release: pkgs.lib.hasPrefix "nightly-" release.tag_name
-                    ) releases;
+                    entries = builtins.tail (pkgs.lib.splitString "<entry>" releasesAtom);
 
-                    nightlyRelease = builtins.foldl' (
-                        latest: release:
-                        if latest == null || release.published_at > latest.published_at then
-                            release
+                    nightlyEntries = builtins.filter (
+                        entry: builtins.match ".*?/releases/tag/v[^\"]*-nightly\.[^\"]*\".*" entry != null
+                    ) entries;
+
+                    nightlyEntry =
+                        if nightlyEntries == [ ] then
+                            throw "No nightly release found in t3code Atom feed"
                         else
-                            latest
-                    ) null nightlyReleases;
+                            builtins.head nightlyEntries;
 
-                    version = builtins.replaceStrings [ "nightly-v" ] [ "" ] nightlyRelease.tag_name;
-                    tag = nightlyRelease.tag_name;
+                    tagMatch = builtins.match ".*href=\"https://github.com/pingdotgg/t3code/releases/tag/([^\"]+)\".*" nightlyEntry;
+
+                    tag =
+                        if tagMatch == null then
+                            throw "Failed to extract nightly tag from t3code Atom feed"
+                        else
+                            builtins.head tagMatch;
+
+                    version = builtins.replaceStrings [ "v" ] [ "" ] tag;
 
                     src = builtins.fetchurl {
                         url = "https://github.com/pingdotgg/t3code/releases/download/${tag}/T3-Code-${version}-x86_64.AppImage";

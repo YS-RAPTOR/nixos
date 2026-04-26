@@ -1,5 +1,9 @@
 [
     (final: prev: {
+        vivaldi = prev.vivaldi.override {
+            proprietaryCodecs = true;
+        };
+
         mailspring = final.symlinkJoin {
             name = "mailspring-${prev.mailspring.version}";
             paths = [ prev.mailspring ];
