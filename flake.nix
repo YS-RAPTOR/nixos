@@ -19,6 +19,7 @@
         opencode.url = "path:./local-flakes/opencode";
         t3code.url = "path:./local-flakes/t3code";
         claude-code.url = "path:./local-flakes/claude-code";
+        codex.url = "path:./local-flakes/codex";
     };
     outputs =
         inputs@{
@@ -28,6 +29,7 @@
             opencode,
             t3code,
             claude-code,
+            codex,
             ...
         }:
         let
@@ -64,6 +66,7 @@
                 opencode = opencode.packages.${settings.system.target}.opencode;
                 t3code = t3code.packages.${settings.system.target}.t3code;
                 claude-code = claude-code.packages.${settings.system.target}.claude-code;
+                codex = codex.packages.${settings.system.target}.codex;
             };
         in
         {

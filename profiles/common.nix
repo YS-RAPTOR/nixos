@@ -75,7 +75,7 @@
                 pkgs.freeoffice
                 extra.t3code
                 extra.claude-code
-                pkgs.codex
+                extra.codex
                 extra.opencode
                 pkgs.gh
                 pkgs.lsof
