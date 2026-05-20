@@ -25,8 +25,8 @@
     packages = import ./packages.nix;
 
     ai = {
-        default = "github-copilot/gpt-5.4";
-        defaultSmall = "github-copilot/gpt-5.4-mini";
+        default = "openai/gpt-5.5";
+        defaultSmall = "openai/gpt-5.4-mini";
     };
 
     wm = {

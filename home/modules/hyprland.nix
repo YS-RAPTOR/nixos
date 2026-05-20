@@ -207,7 +207,6 @@ in
             ];
 
             dwindle = {
-                pseudotile = true;
                 preserve_split = true;
             };
 
@@ -266,7 +265,7 @@ in
                 "$mainMod SHIFT, D, exec, $browser -incognito"
 
                 "$mainMod SHIFT, P, pseudo,"
-                "$mainMod SHIFT, A, togglesplit,"
+                "$mainMod SHIFT, A, layoutmsg, togglesplit"
 
                 "$mainMod, T, togglefloating,"
                 "$mainMod, F, exec, $toggleScrollColsize"
