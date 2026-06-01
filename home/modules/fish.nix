@@ -22,7 +22,6 @@
             tree = "eza --tree --icons";
             cat = "bat --paging=never";
             less = "bat --paging=always";
-            ghostty = "${pkgs.ghostty}/bin/ghostty";
             opencode = "GITHUB_TOKEN='' command opencode";
         };
         functions = {

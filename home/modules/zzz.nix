@@ -8,6 +8,7 @@
         ./ghostty.nix
         ./github.nix
         ./hyprland.nix
+        ./nix-context.nix
         ./oh-my-posh.nix
         ./opencode.nix
         ./simple.nix

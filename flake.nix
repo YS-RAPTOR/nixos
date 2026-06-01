@@ -16,17 +16,21 @@
 
         local-flakes.url = "path:./local-flakes";
         local-flakes.inputs.nixpkgs.follows = "nixpkgs-unstable";
+
+        waybar.url = "github:Alexays/Waybar/master";
+        waybar.inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
     outputs =
         inputs@{
             self,
             local-flakes,
+            waybar,
             ...
         }:
         let
             profile = "home";
             settings = import ./profiles/${profile}/zzz.nix;
-            overlays = import ./overlays/zzz.nix;
+            overlays = [ waybar.overlays.default ] ++ import ./overlays/zzz.nix;
 
             pkgs-unstable = import inputs.nixpkgs-unstable {
                 system = settings.system.target;

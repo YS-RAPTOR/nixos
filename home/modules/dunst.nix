@@ -1,6 +1,5 @@
 {
     lib,
-    settings,
     config,
     ...
 }:
@@ -9,7 +8,7 @@
         enable = true;
         settings = {
             global = {
-                monitor = settings.wm.dunst.monitorId;
+                follow = "keyboard";
             };
             urgency_normal = {
                 frame_color = lib.mkForce "#${config.lib.stylix.colors.base0B}";

@@ -29,50 +29,7 @@
         defaultSmall = "openai/gpt-5.4-mini";
     };
 
-    wm = {
-        startup = pkgs: [ ];
-        dunst.monitorId = 0;
-        workspaces = [
-            {
-                name = "N-1";
-                key = "1";
-                keyModifier = "";
-                monitor = "eDP-1";
-                rule = "name:N-1, monitor:eDP-1, default:true, layout:scrolling";
-            }
-            {
-                name = "N-2";
-                key = "2";
-                keyModifier = "";
-                monitor = "eDP-1";
-                rule = "name:N-2, monitor:eDP-1, default:true, layout:scrolling";
-            }
-            {
-                name = "N-3";
-                key = "3";
-                keyModifier = "";
-                monitor = "eDP-1";
-                rule = "name:N-3, monitor:eDP-1, default:true, layout:scrolling";
-            }
-            {
-                name = "N-4";
-                key = "4";
-                keyModifier = "";
-                monitor = "eDP-1";
-                rule = "name:N-4, monitor:eDP-1, default:true";
-            }
-            {
-                name = "N-5";
-                key = "5";
-                keyModifier = "";
-                monitor = "eDP-1";
-                rule = "name:N-5, monitor:eDP-1, default:true";
-            }
-        ];
-        monitors = [
-            "eDP-1,3200x2000@120.00Hz,auto,1.6"
-        ];
-    };
+    startup = [ ];
 
     hardware = {
         configFile = ./hardware-configuration.nix;

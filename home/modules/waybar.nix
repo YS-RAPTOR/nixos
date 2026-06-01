@@ -1,33 +1,27 @@
-{ settings, config, ... }:
+{
+    settings,
+    config,
+    lib,
+    ...
+}:
 let
     tmux = "${settings.user.extraDir}/scripts/tmux.sh";
     weather = "${settings.user.extraDir}/scripts/weather.sh";
     bluetooth = "${settings.user.extraDir}/scripts/wofi-bluetooth.sh";
     colorpicker = "${settings.user.extraDir}/scripts/colorpicker.sh";
     colors = config.lib.stylix.colors;
-    workspaceIcon = "";
-    monitorWorkspaceNames = builtins.foldl' (
-        acc: workspace:
-        acc
-        // {
-            "${workspace.monitor}" =
-                (if builtins.hasAttr workspace.monitor acc then builtins.getAttr workspace.monitor acc else [ ])
-                ++ [ workspace.name ];
-        }
-    ) { } settings.wm.workspaces;
-    workspaceNamesAll = builtins.map (workspace: workspace.name) settings.wm.workspaces;
-    workspaceIcons = builtins.listToAttrs (
-        builtins.map (name: {
-            inherit name;
-            value = workspaceIcon;
-        }) workspaceNamesAll
-    );
 
     brightness = import ../../lib/brightness.nix { inherit settings; };
     primaryBacklight = builtins.head settings.hardware.backlights;
 
 in
 {
+    home.activation.ensureWaybarHyprlandWorkspaces = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+        mkdir -p "$HOME/.config/waybar"
+        if [ ! -e "$HOME/.config/waybar/hyprland-workspaces.json" ]; then
+          printf '%s\n' '{"hyprland/workspaces":{"format":"{icon}","format-icons":{"active":"","default":""},"persistent-workspaces":{}}}' > "$HOME/.config/waybar/hyprland-workspaces.json"
+        fi
+    '';
 
     programs.waybar = {
         systemd.enable = true;
@@ -35,6 +29,7 @@ in
 
         settings = [
             {
+                include = "${settings.user.homeDir}/.config/waybar/hyprland-workspaces.json";
                 layer = "top";
                 position = "top";
                 modules-left = [
@@ -59,15 +54,6 @@ in
                     format = "{}";
                     return-type = "json";
                     exec = tmux;
-                };
-
-                "hyprland/workspaces" = {
-                    format = "{icon}";
-                    format-icons = workspaceIcons // {
-                        "active" = "";
-                        "default" = workspaceIcon;
-                    };
-                    persistent-workspaces = monitorWorkspaceNames;
                 };
 
                 "custom/weather" = {
