@@ -8,28 +8,19 @@
         stylix-unstable.url = "github:nix-community/stylix/master";
         stylix-unstable.inputs.nixpkgs.follows = "nixpkgs-unstable";
 
-        nixpkgs-stable.url = "nixpkgs/nixos-25.05";
-        home-manager-stable.url = "github:nix-community/home-manager/release-25.05";
+        nixpkgs-stable.url = "nixpkgs/nixos-26.05";
+        home-manager-stable.url = "github:nix-community/home-manager/release-26.05";
         home-manager-stable.inputs.nixpkgs.follows = "nixpkgs-stable";
-        stylix-stable.url = "github:nix-community/stylix/release-25.05";
+        stylix-stable.url = "github:nix-community/stylix/release-25.11";
         stylix-stable.inputs.nixpkgs.follows = "nixpkgs-stable";
 
-        affinity-nix.url = "path:./local-flakes/affinity-nix";
-        wombat.url = "path:./local-flakes/wombat";
-        opencode.url = "path:./local-flakes/opencode";
-        t3code.url = "path:./local-flakes/t3code";
-        claude-code.url = "path:./local-flakes/claude-code";
-        codex.url = "path:./local-flakes/codex";
+        local-flakes.url = "path:./local-flakes";
+        local-flakes.inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
     outputs =
         inputs@{
             self,
-            affinity-nix,
-            wombat,
-            opencode,
-            t3code,
-            claude-code,
-            codex,
+            local-flakes,
             ...
         }:
         let
@@ -60,16 +51,11 @@
             pkgs = if settings.system.unstable then pkgs-unstable else pkgs-stable;
             stylix = inputs."stylix-${channel}";
 
-            extra = {
-                affinity = affinity-nix.packages.${settings.system.target}.v3;
-                wombat = wombat.packages.${settings.system.target}.wombat;
-                opencode = opencode.packages.${settings.system.target}.opencode;
-                t3code = t3code.packages.${settings.system.target}.t3code;
-                claude-code = claude-code.packages.${settings.system.target}.claude-code;
-                codex = codex.packages.${settings.system.target}.codex;
-            };
+            extra = local-flakes.packages.${settings.system.target};
         in
         {
+            packages.${settings.system.target} = local-flakes.packages.${settings.system.target};
+
             formatter.${settings.system.target} = pkgs.writeShellApplication {
                 name = "nixfmt";
                 runtimeInputs = [
