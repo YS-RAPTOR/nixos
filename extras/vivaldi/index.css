@@ -1,3 +1,7 @@
+#header {
+    display: none !important;
+}
+
 #titlebar .window-buttongroup {
     display: flex !important;
     gap: 1.5px;
