@@ -98,19 +98,37 @@ local function pyramid_positions(monitors, variant)
 
     result[primary.name].y = max_top_height
 
+    local slot_monitor = {}
+    for index = 2, #monitors do
+        slot_monitor[top[index - 1]] = monitors[index]
+    end
+
+    local top_order = #monitors == 2 and top or { "left", "right" }
+    local top_width = 0
+    for _, slot in ipairs(top_order) do
+        top_width = top_width + logical_size(slot_monitor[slot]).width
+    end
+
+    local row_x = 0
+    if variant == "center" then
+        row_x = (primary_size.width - top_width) / 2
+    elseif variant == "right" then
+        row_x = primary_size.width - top_width
+    end
+
+    local slot_x = {}
+    for _, slot in ipairs(top_order) do
+        local monitor = slot_monitor[slot]
+        slot_x[slot] = row_x
+        row_x = row_x + logical_size(monitor).width
+    end
+
     for index = 2, #monitors do
         local monitor = monitors[index]
         local size = logical_size(monitor)
         local slot = top[index - 1]
-        local x = 0
 
-        if slot == "center" then
-            x = (primary_size.width - size.width) / 2
-        elseif slot == "right" then
-            x = primary_size.width - size.width
-        end
-
-        result[monitor.name] = { x = x, y = max_top_height - size.height }
+        result[monitor.name] = { x = slot_x[slot], y = max_top_height - size.height }
     end
 
     return result
@@ -201,7 +219,7 @@ function M.apply_workspace_rules(monitors)
 end
 
 function M.apply()
-    hl.monitor({ output = "", mode = "highrr", position = "auto", scale = 1 })
+    hl.monitor({ output = "", mode = "highres", position = "auto", scale = 1 })
 
     local monitors = M.ordered()
     if #monitors == 0 then
@@ -213,7 +231,7 @@ function M.apply()
         local placement = placements[monitor.name]
         hl.monitor({
             output = monitor.name,
-            mode = "highrr",
+            mode = "highres",
             position = position(placement.x, placement.y),
             scale = scale_for(monitor),
         })
