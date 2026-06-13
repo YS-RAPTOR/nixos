@@ -80,6 +80,10 @@ local function pyramid_positions(monitors, variant)
         [primary.name] = { x = 0, y = 0 },
     }
 
+    if #monitors == 1 then
+        return result
+    end
+
     local top = {}
     if #monitors == 2 then
         top = { variant == "right" and "right" or variant == "center" and "center" or "left" }
