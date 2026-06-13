@@ -218,6 +218,15 @@ function M.apply_workspace_rules(monitors)
 	end
 end
 
+local function apply_default_workspaces(monitors)
+	for monitor_index, monitor in ipairs(monitors) do
+		local workspace = monitor.active_workspace
+		if workspace and not workspace.is_persistent then
+			hl.dispatch(hl.dsp.focus({ workspace = "name:" .. M.workspace_name(monitor_index, 1) }))
+		end
+	end
+end
+
 function M.apply()
     hl.monitor({ output = "", mode = "highres", position = "auto", scale = 1 })
 
@@ -238,6 +247,7 @@ function M.apply()
     end
 
     M.apply_workspace_rules(monitors)
+    apply_default_workspaces(monitors)
     waybar.write_workspaces(monitors, M.workspace_name, M.workspace_count)
     waybar.reload()
 end
