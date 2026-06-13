@@ -21,7 +21,6 @@ if not content then
 		paths = {},
 		user = {},
 		hardware = {},
-		startup = {},
 	}
 end
 

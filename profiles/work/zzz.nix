@@ -30,9 +30,30 @@
     };
 
     startup = [
-        "[workspace name:C-1 silent] vivaldi"
-        "[workspace name:C-2 silent] slack"
-        "[workspace name:C-3 silent] teams-for-linux"
+        {
+            command = "vivaldi";
+            workspaceByMonitorCount = {
+                "1" = "N-3";
+                "2" = "A-1";
+                "3" = "C-1";
+            };
+        }
+        {
+            command = "slack";
+            workspaceByMonitorCount = {
+                "1" = "N-3";
+                "2" = "A-2";
+                "3" = "C-2";
+            };
+        }
+        {
+            command = "teams-for-linux";
+            workspaceByMonitorCount = {
+                "1" = "N-3";
+                "2" = "A-3";
+                "3" = "C-3";
+            };
+        }
     ];
 
     hardware = {

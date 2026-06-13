@@ -12,6 +12,7 @@
         ./oh-my-posh.nix
         ./opencode.nix
         ./simple.nix
+        ./startup.nix
         ./tmux.nix
         ./waybar.nix
         ./wm.nix

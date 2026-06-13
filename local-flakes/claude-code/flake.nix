@@ -61,9 +61,10 @@
                     inherit src;
                     dontStrip = true;
 
-                    nativeBuildInputs =
-                        [ pkgs.makeWrapper ]
-                        ++ pkgs.lib.optionals pkgs.stdenv.hostPlatform.isLinux [ pkgs.autoPatchelfHook ];
+                    nativeBuildInputs = [
+                        pkgs.makeWrapper
+                    ]
+                    ++ pkgs.lib.optionals pkgs.stdenv.hostPlatform.isLinux [ pkgs.autoPatchelfHook ];
 
                     unpackPhase = ''
                         tar -xzf "$src"

@@ -43,7 +43,5 @@ in
             inherit (settings.hardware) backlights;
             keyboardBacklight = settings.hardware.keyboard.backlight.device;
         };
-
-        inherit (settings) startup;
     };
 }
