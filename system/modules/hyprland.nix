@@ -14,5 +14,8 @@
         ];
     };
 
+    systemd.user.services.xdg-desktop-portal.unitConfig.ConditionEnvironment =
+        "WAYLAND_DISPLAY";
+
     environment.sessionVariables.NIXOS_OZONE_WL = "1";
 }
