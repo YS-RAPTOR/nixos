@@ -19,38 +19,42 @@
                 let
                     pkgs = nixpkgs.legacyPackages.${system};
 
-                    releasesAtom = builtins.replaceStrings [ "\n" "\r" ] [ "" "" ] (
+                    releases = builtins.fromJSON (
                         builtins.readFile (
                             builtins.fetchurl {
-                                url = "https://github.com/pingdotgg/t3code/releases.atom";
+                                url = "https://api.github.com/repos/pingdotgg/t3code/releases?per_page=20";
                             }
                         )
                     );
 
-                    entries = builtins.tail (pkgs.lib.splitString "<entry>" releasesAtom);
+                    nightlyReleases = builtins.filter (release: pkgs.lib.hasInfix "-nightly." release.tag_name) releases;
 
-                    nightlyEntries = builtins.filter (
-                        entry: builtins.match ".*?/releases/tag/v[^\"]*-nightly\.[^\"]*\".*" entry != null
-                    ) entries;
-
-                    nightlyEntry =
-                        if nightlyEntries == [ ] then
-                            throw "No nightly release found in t3code Atom feed"
+                    release =
+                        if nightlyReleases == [ ] then
+                            throw "No nightly release found in t3code GitHub releases"
                         else
-                            builtins.head nightlyEntries;
+                            builtins.head nightlyReleases;
 
-                    tagMatch = builtins.match ".*href=\"https://github.com/pingdotgg/t3code/releases/tag/([^\"]+)\".*" nightlyEntry;
+                    tag = release.tag_name;
+                    version = pkgs.lib.removePrefix "v" tag;
 
-                    tag =
-                        if tagMatch == null then
-                            throw "Failed to extract nightly tag from t3code Atom feed"
+                    appimageAssets = builtins.filter (
+                        asset: asset.name == "T3-Code-${version}-x86_64.AppImage"
+                    ) release.assets;
+
+                    appimageAsset =
+                        if appimageAssets == [ ] then
+                            throw "No x86_64 AppImage found for t3code release ${tag}"
                         else
-                            builtins.head tagMatch;
+                            builtins.head appimageAssets;
 
-                    version = builtins.replaceStrings [ "v" ] [ "" ] tag;
-
-                    src = builtins.fetchurl {
-                        url = "https://github.com/pingdotgg/t3code/releases/download/${tag}/T3-Code-${version}-x86_64.AppImage";
+                    src = pkgs.fetchurl {
+                        url = appimageAsset.browser_download_url;
+                        hash = builtins.convertHash {
+                            hashAlgo = "sha256";
+                            hash = pkgs.lib.removePrefix "sha256:" appimageAsset.digest;
+                            toHashFormat = "sri";
+                        };
                     };
                 in
                 pkgs.appimageTools.wrapType2 {

@@ -22,7 +22,7 @@
             tree = "eza --tree --icons";
             cat = "bat --paging=never";
             less = "bat --paging=always";
-            opencode = "GITHUB_TOKEN='' command opencode";
+            gh = "GITHUB_TOKEN='' command gh";
         };
         functions = {
             _bind_bang = ''
