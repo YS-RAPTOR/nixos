@@ -35,16 +35,6 @@ function M.write_workspaces(monitors, workspace_name, workspace_count)
 	end
 	write_line(lines, 3, quote_json("active") .. ": " .. quote_json("") .. ",")
 	write_line(lines, 3, quote_json("default") .. ": " .. quote_json(workspace_icon))
-	write_line(lines, 2, "},")
-	write_line(lines, 2, quote_json("persistent-workspaces") .. ": {")
-	for monitor_index, monitor in ipairs(monitors) do
-		local suffix = monitor_index < #monitors and "," or ""
-		local workspaces = {}
-		for key = 1, workspace_count do
-			table.insert(workspaces, quote_json(workspace_name(monitor_index, key)))
-		end
-		write_line(lines, 3, quote_json(monitor.name) .. ": [" .. table.concat(workspaces, ", ") .. "]" .. suffix)
-	end
 	write_line(lines, 2, "}")
 	write_line(lines, 1, "}")
 	write_line(lines, 0, "}")

@@ -19,7 +19,7 @@ in
     home.activation.ensureWaybarHyprlandWorkspaces = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
         mkdir -p "$HOME/.config/waybar"
         if [ ! -e "$HOME/.config/waybar/hyprland-workspaces.json" ]; then
-          printf '%s\n' '{"hyprland/workspaces":{"format":"{icon}","format-icons":{"active":"","default":""},"persistent-workspaces":{}}}' > "$HOME/.config/waybar/hyprland-workspaces.json"
+          printf '%s\n' '{"hyprland/workspaces":{"format":"{icon}","format-icons":{"active":"","default":""}}}' > "$HOME/.config/waybar/hyprland-workspaces.json"
         fi
     '';
 
