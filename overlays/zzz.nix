@@ -4,6 +4,16 @@
             proprietaryCodecs = true;
         };
 
+        gh = final.symlinkJoin {
+            name = "gh-${prev.gh.version}";
+            paths = [ prev.gh ];
+            buildInputs = [ final.makeWrapper ];
+            postBuild = ''
+                wrapProgram $out/bin/gh \
+                  --set GITHUB_TOKEN ""
+            '';
+        };
+
         mailspring = final.symlinkJoin {
             name = "mailspring-${prev.mailspring.version}";
             paths = [ prev.mailspring ];
