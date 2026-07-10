@@ -25,8 +25,8 @@
     packages = import ./packages.nix;
 
     ai = {
-        default = "openai/gpt-5.5";
-        defaultSmall = "openai/gpt-5.4-mini";
+        default = "openai/gpt-5.6-sol-fast";
+        defaultSmall = "openai/gpt-5.6-luna-fast";
     };
 
     startup = [
