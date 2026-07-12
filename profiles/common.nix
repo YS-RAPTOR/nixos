@@ -77,6 +77,7 @@
                 extra.claude-code
                 extra.codex
                 extra.opencode
+                extra.pi
                 pkgs.gh
                 pkgs.lsof
                 pkgs.trash-cli

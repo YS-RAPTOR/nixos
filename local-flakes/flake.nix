@@ -16,6 +16,9 @@
         t3code.url = "path:./t3code";
         t3code.inputs.nixpkgs.follows = "nixpkgs";
 
+        pi.url = "path:./pi";
+        pi.inputs.nixpkgs.follows = "nixpkgs";
+
         claude-code.url = "path:./claude-code";
         claude-code.inputs.nixpkgs.follows = "nixpkgs";
 
@@ -31,6 +34,7 @@
             wombat,
             opencode,
             t3code,
+            pi,
             claude-code,
             codex,
             ...
@@ -66,6 +70,7 @@
                         // (optionalPackage wombat system "wombat" "wombat")
                         // (optionalPackage opencode system "opencode" "opencode")
                         // (optionalPackage t3code system "t3code" "t3code")
+                        // (optionalPackage pi system "pi" "pi")
                         // (optionalPackage claude-code system "claude-code" "claude-code")
                         // (optionalPackage codex system "codex" "codex");
                 in
