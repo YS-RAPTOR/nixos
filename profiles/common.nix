@@ -77,6 +77,7 @@
                 extra.claude-code
                 extra.codex
                 extra.opencode
+                extra.opencode-desktop
                 extra.pi
                 pkgs.gh
                 pkgs.lsof

@@ -15,6 +15,11 @@
                 "aarch64-darwin"
             ];
 
+            desktopSystems = [
+                "x86_64-linux"
+                "aarch64-linux"
+            ];
+
             forAllSystems = nixpkgs.lib.genAttrs supportedSystems;
 
             systemToAsset = {
@@ -34,6 +39,11 @@
                     fileName = "opencode-darwin-arm64.zip";
                     binaryName = "opencode";
                 };
+            };
+
+            systemToDesktopAsset = {
+                "x86_64-linux" = "opencode-desktop-linux-x86_64.AppImage";
+                "aarch64-linux" = "opencode-desktop-linux-arm64.AppImage";
             };
 
             mkOpencode =
@@ -89,11 +99,56 @@
                         mainProgram = "opencode";
                     };
                 };
+
+            mkOpencodeDesktop =
+                system:
+                let
+                    pkgs = nixpkgs.legacyPackages.${system};
+                    assetName = systemToDesktopAsset.${system};
+                    src = builtins.fetchurl {
+                        url = "https://github.com/anomalyco/opencode/releases/latest/download/${assetName}";
+                    };
+                    appimageContents = pkgs.appimageTools.extractType2 {
+                        pname = "opencode-desktop";
+                        version = "latest";
+                        inherit src;
+                    };
+                in
+                pkgs.appimageTools.wrapType2 {
+                    pname = "opencode-desktop";
+                    version = "latest";
+                    inherit src;
+
+                    extraPkgs = appPkgs: [ appPkgs.libsecret ];
+
+                    extraInstallCommands = ''
+                        install -m 444 -D ${appimageContents}/ai.opencode.desktop.desktop \
+                            $out/share/applications/opencode-desktop.desktop
+                        substituteInPlace $out/share/applications/opencode-desktop.desktop \
+                            --replace-fail 'Exec=AppRun --no-sandbox %U' 'Exec=opencode-desktop --no-sandbox %U'
+                        cp -r ${appimageContents}/usr/share/icons $out/share/icons
+                    '';
+
+                    meta = with pkgs.lib; {
+                        description = "Desktop app for the open source coding agent";
+                        homepage = "https://opencode.ai/download";
+                        license = licenses.mit;
+                        platforms = desktopSystems;
+                        mainProgram = "opencode-desktop";
+                        sourceProvenance = with sourceTypes; [ binaryNativeCode ];
+                    };
+                };
         in
         {
-            packages = forAllSystems (system: {
-                opencode = mkOpencode system;
-                default = mkOpencode system;
-            });
+            packages = forAllSystems (
+                system:
+                {
+                    opencode = mkOpencode system;
+                    default = mkOpencode system;
+                }
+                // nixpkgs.lib.optionalAttrs (builtins.elem system desktopSystems) {
+                    opencode-desktop = mkOpencodeDesktop system;
+                }
+            );
         };
 }

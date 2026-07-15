@@ -69,6 +69,7 @@
                         (optionalPackage affinity-nix system "v3" "affinity")
                         // (optionalPackage wombat system "wombat" "wombat")
                         // (optionalPackage opencode system "opencode" "opencode")
+                        // (optionalPackage opencode system "opencode-desktop" "opencode-desktop")
                         // (optionalPackage t3code system "t3code" "t3code")
                         // (optionalPackage pi system "pi" "pi")
                         // (optionalPackage claude-code system "claude-code" "claude-code")
