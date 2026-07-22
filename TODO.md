@@ -8,3 +8,5 @@ setup pi!
 - codex tier computer use and browser use!
 - pi mcp adaptor
 - pi-subagents with only the delegat agent, nothing else that is special.
+
+https://github.com/milanglacier/minuet-ai.nvim
