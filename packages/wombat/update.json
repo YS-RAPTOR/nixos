@@ -1,0 +1,9 @@
+{
+    "repository": "wombatwisdom/wombat",
+    "assets": {
+        "x86_64-linux": "wombat_Linux_x86_64.tar.gz",
+        "aarch64-linux": "wombat_Linux_arm64.tar.gz",
+        "x86_64-darwin": "wombat_Darwin_x86_64.tar.gz",
+        "aarch64-darwin": "wombat_Darwin_arm64.tar.gz"
+    }
+}

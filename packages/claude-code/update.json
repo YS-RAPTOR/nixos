@@ -1,0 +1,9 @@
+{
+    "repository": "anthropics/claude-code",
+    "assets": {
+        "x86_64-linux": "claude-linux-x64.tar.gz",
+        "aarch64-linux": "claude-linux-arm64.tar.gz",
+        "x86_64-darwin": "claude-darwin-x64.tar.gz",
+        "aarch64-darwin": "claude-darwin-arm64.tar.gz"
+    }
+}

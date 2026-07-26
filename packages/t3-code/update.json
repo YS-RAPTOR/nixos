@@ -1,0 +1,7 @@
+{
+    "repository": "pingdotgg/t3code",
+    "tagPattern": "-nightly.",
+    "assets": {
+        "x86_64-linux": "^T3-Code-.*-x86_64\\.AppImage$"
+    }
+}
