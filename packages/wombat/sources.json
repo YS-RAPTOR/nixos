@@ -1,0 +1,9 @@
+{
+    "platforms": {
+        "x86_64-linux": {
+            "version": "1.0.7",
+            "url": "https://github.com/wombatwisdom/wombat/releases/download/v1.0.7/wombat_Linux_x86_64.tar.gz",
+            "hash": "sha256-01pBgTFvVyWmNrW3R0w0XuNlEgM8w2cuRgsk4lm/n6A="
+        }
+    }
+}

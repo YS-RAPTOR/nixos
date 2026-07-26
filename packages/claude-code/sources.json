@@ -1,0 +1,9 @@
+{
+    "platforms": {
+        "x86_64-linux": {
+            "version": "2.1.220",
+            "url": "https://github.com/anthropics/claude-code/releases/download/v2.1.220/claude-linux-x64.tar.gz",
+            "hash": "sha256-5p5/cteEwkO8w3eleK2f+OZa4U2mcvu/nyunv0fsp+w="
+        }
+    }
+}

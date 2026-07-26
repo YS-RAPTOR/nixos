@@ -1,0 +1,9 @@
+{
+    "platforms": {
+        "x86_64-linux": {
+            "version": "1.18.5",
+            "url": "https://github.com/anomalyco/opencode/releases/download/v1.18.5/opencode-desktop-linux-x86_64.AppImage",
+            "hash": "sha256-4JS9x4otiCpE3R6uGHz9VsVuZR6Mq+9oAFU1R48zrHc="
+        }
+    }
+}

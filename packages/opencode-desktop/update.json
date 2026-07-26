@@ -1,0 +1,7 @@
+{
+    "repository": "anomalyco/opencode",
+    "assets": {
+        "x86_64-linux": "opencode-desktop-linux-x86_64.AppImage",
+        "aarch64-linux": "opencode-desktop-linux-arm64.AppImage"
+    }
+}

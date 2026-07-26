@@ -1,0 +1,92 @@
+#header {
+    display: none !important;
+}
+
+#titlebar .window-buttongroup {
+    display: flex !important;
+    gap: 1.5px;
+}
+
+#titlebar .window-buttongroup button {
+    display: inline-block !important;
+    width: 50px !important;
+    margin: 0px !important;
+}
+
+#titlebar .window-buttongroup .window-minimize {
+    background-color: #3b82f6 !important;
+}
+
+#titlebar .window-buttongroup .window-maximize {
+    background-color: #10b981 !important;
+}
+
+#titlebar .window-buttongroup .window-close {
+    background-color: #ef4444 !important;
+    padding: 1px 6px !important;
+}
+
+#titlebar .window-buttongroup .window-minimize:hover {
+    background-color: #60a5fa !important;
+}
+
+#titlebar .window-buttongroup .window-maximize:hover {
+    background-color: #34d399 !important;
+}
+
+#titlebar .window-buttongroup .window-close:hover {
+    background-color: #f87171 !important;
+}
+
+#panels-container {
+    width: 0px !important;
+}
+
+#panels-container .panel-group {
+    right: 0px !important;
+}
+
+/* Sidebar Top Styling */
+
+#tabs-container> :is(.toolbar):first-of-type> :not(.UrlBar-AddressField) svg {
+    width: 22px !important;
+    height: 22px !important;
+}
+
+#tabs-container> :is(.toolbar):first-of-type> :not(.UrlBar-AddressField) img:is(.button-icon) {
+    width: 16px !important;
+    height: 16px !important;
+}
+
+#tabs-container> :is(.toolbar):first-of-type> :not(.UrlBar-AddressField) .ToolbarButton-Button {
+    min-width: 24px !important;
+    height: 24px !important;
+}
+
+#tabs-container .tabbar-workspace-button .button-toolbar-menu-indicator svg {
+    transform: rotate(180deg);
+    transform-origin: center;
+}
+
+/* Sidebar Address Bar Styling */
+
+#tabs-container .UrlBar-AddressField {
+    margin: 6px 0px !important;
+    height: 50px !important;
+    background-color: rgba(255, 255, 255, 0.15) !important;
+    border-radius: 5px !important;
+}
+
+#tabs-container .UrlBar-AddressField input {
+    padding: 4px !important;
+}
+
+#tabs-container .UrlBar-AddressField .OmniDropdown {
+    padding-top: 50px !important;
+}
+
+/* Active Tab */
+
+#tabs-container>.resize .tab:is(.active) {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+}
