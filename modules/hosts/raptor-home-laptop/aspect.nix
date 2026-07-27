@@ -1,23 +1,23 @@
 { den, ... }: {
   den.aspects.raptor-home-laptop = {
     includes = [
-      den.aspects.system.core
+      den.aspects.system.base.core
       den.aspects.system.locale
-      den.aspects.system.efi-grub
-      den.aspects.services.network
-      den.aspects.services.pipewire
+      den.aspects.system.boot.efi-grub
+      den.aspects.services.networking.networkmanager
+      den.aspects.services.audio.pipewire
       den.aspects.services.bluetooth
-      den.aspects.services.printing
-      den.aspects.shell.login
-      (den.batteries.nvidia-prime {
+      den.aspects.services.printing.cups
+      den.aspects.desktop.session.login.regreet
+      (den.batteries.system.hardware.graphics.nvidia-prime {
         intelBusId = "PCI:0:2:0";
         nvidiaBusId = "PCI:1:0:0";
       })
-      (den.batteries.display-brightness [
+      (den.batteries.system.hardware.brightness.display [
         "intel_backlight"
         "nvidia_0"
       ])
-      (den.batteries.keyboard-brightness {
+      (den.batteries.system.hardware.brightness.keyboard {
         device = "platform::kbd_backlight";
         maxValue = 2;
       })

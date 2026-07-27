@@ -1,6 +1,6 @@
 { den, ... }: {
   den.aspects.operations.auto-update.includes = [
-    den.aspects.services.network
+    den.aspects.services.networking.networkmanager
     ({ host, user, ... }: {
       name = "auto-update(${user.userName}@${host.name})";
       nixos =

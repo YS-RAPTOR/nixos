@@ -2,74 +2,61 @@
   den.aspects.raptor.includes = [
     den.batteries.primary-user
     (den.batteries.user-shell "fish")
-    (den.batteries.editor.default { command = [ "nvim" ]; })
-    (den.batteries.pager.default {
-      command = [
-        "bat"
-        "--paging=always"
-      ];
-    })
-    (den.batteries.terminal.default {
-      command = [ "ghostty" ];
-      execArgs = [ "-e" ];
-      windowTitle = "Ghostty";
-    })
-    (den.batteries.browser.default {
-      command = [ "vivaldi" ];
-      privateCommand = [
-        "vivaldi"
-        "-incognito"
-      ];
-      desktopFile = "vivaldi-stable.desktop";
-    })
-    (den.batteries.file-manager.default { command = [ "nautilus" ]; })
-    (den.batteries.launcher.default {
-      command = [
-        "wofi"
-        "--show"
-        "drun"
-      ];
-    })
-    den.aspects.services.docker
-    den.aspects.system.user
+    den.batteries.programs.editor.defaults.neovim
+    den.batteries.programs.pager.defaults.bat
+    den.batteries.terminal.defaults.ghostty
+    den.batteries.terminal.session.defaults.tmux
+    den.batteries.programs.browser.defaults.vivaldi
+    den.batteries.programs.file-manager.defaults.nautilus
+    den.batteries.desktop.shell.launcher.defaults.wofi
+    den.aspects.services.containers.docker
+    den.aspects.system.accounts.user
     den.aspects.services.credentials
-    den.aspects.services.removable-media
-    den.aspects.services.vpn
-    den.aspects.shell.stylix
-    den.aspects.compositor.hyprland
-    den.aspects.shell.wallpaper
-    den.aspects.shell.lock
-    den.aspects.shell.idle
-    den.aspects.shell.notifications
-    den.aspects.shell.polkit
-    den.aspects.shell.startup
-    den.aspects.shell.waybar
-    den.aspects.shell.file-manager
-    den.aspects.shell.launcher
-    den.aspects.shell.user-dirs
-    den.aspects.terminal.fish
-    den.aspects.terminal.prompt
-    den.aspects.terminal.tmux
-    den.aspects.terminal.ghostty
+    den.aspects.services.storage.removable-media
+    den.aspects.services.networking.openvpn
+    den.aspects.appearance.theme.stylix
+    den.aspects.desktop.compositor.hyprland
+    den.aspects.appearance.wallpaper.hyprpaper
+    den.aspects.desktop.session.lock.hyprlock
+    den.aspects.desktop.session.idle.brightness
+    den.aspects.desktop.shell.notifications.dunst
+    den.aspects.desktop.session.polkit.hyprpolkitagent
+    den.aspects.desktop.session.startup.hyprland
+    den.aspects.desktop.shell.panel.waybar
+    den.aspects.programs.file-manager.yazi
+    den.aspects.desktop.session.user-dirs.xdg
+    den.aspects.terminal.shell.bash
+    den.aspects.terminal.shell.fish
+    den.aspects.terminal.shell.prompt.oh-my-posh
     den.aspects.terminal.kitty
-    den.aspects.browser.firefox
-    den.aspects.browser.vivaldi
-    den.aspects.applications.freeoffice
-    den.aspects.applications.vesktop
-    den.aspects.applications.affinity
-    den.aspects.editor.neovim
-    den.aspects.editor.vscode
-    den.aspects.tooling.cli
-    den.aspects.tooling.navigation
-    den.aspects.tooling.pager
-    den.aspects.tooling.direnv
-    den.aspects.tooling.git
-    den.aspects.tooling.docs
-    den.aspects.tooling.toolchains
-    den.aspects.tooling.android
-    den.aspects.agent.packages
-    den.aspects.agent.opencode
-    den.aspects.operations.raptor
+    den.aspects.programs.browser.firefox
+    den.aspects.programs.applications.freeoffice
+    den.aspects.programs.applications.vesktop
+    den.aspects.programs.applications.affinity
+    den.aspects.programs.editor.vscode
+    den.aspects.development.tools.cli
+    den.aspects.development.tools.navigation.eza
+    den.aspects.development.tools.navigation.fzf
+    den.aspects.development.tools.navigation.zoxide
+    den.aspects.development.tools.direnv
+    den.aspects.development.version-control.git
+    den.aspects.development.tools.docs
+    den.aspects.development.toolchains.c-cpp
+    den.aspects.development.toolchains.dotnet
+    den.aspects.development.toolchains.go
+    den.aspects.development.toolchains.java
+    den.aspects.development.toolchains.javascript
+    den.aspects.development.toolchains.python
+    den.aspects.development.toolchains.rust
+    den.aspects.development.toolchains.zig
+    den.aspects.development.tools.android
+    den.aspects.development.agents.claude-code
+    den.aspects.development.agents.codex
+    den.aspects.development.agents.opencode.desktop
+    den.aspects.development.agents.pi
+    den.aspects.development.agents.t3-code
+    den.aspects.development.agents.opencode
+    den.aspects.operations.raptor-cli
     den.aspects.operations.auto-update
   ];
 }
