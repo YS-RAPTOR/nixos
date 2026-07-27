@@ -1,37 +1,30 @@
 { den, ... }: {
   den.aspects.desktop.session.login.regreet = {
     includes = [ den.aspects.appearance.theme.stylix ];
-    nixos =
-      { pkgs, ... }:
-      let
-        pixelSakura = pkgs.runCommand "pixel-sakura.gif" { } ''
-          cp ${pkgs.sddm-astronaut}/share/sddm/themes/sddm-astronaut-theme/Backgrounds/pixel_sakura.gif "$out"
-        '';
-      in
-      {
-        services.accounts-daemon.enable = true;
+    nixos = {
+      services.accounts-daemon.enable = true;
 
-        programs.regreet = {
-          enable = true;
+      programs.regreet = {
+        enable = true;
 
-          settings = {
-            skip_selection = true;
+        settings = {
+          skip_selection = true;
 
-            background = {
-              path = pixelSakura;
-              fit = "Cover";
-            };
+          background = {
+            path = ./_files/pixel-sakura.webm;
+            fit = "Cover";
+          };
 
-            appearance.greeting_msg = "Welcome back!";
+          appearance.greeting_msg = "Welcome back!";
 
-            widget.clock = {
-              format = "%H:%M%n%A, %d %B %Y";
-              resolution = "1s";
-            };
+          widget.clock = {
+            format = "%H:%M%n%A, %d %B %Y";
+            resolution = "1s";
           };
         };
-
-        stylix.targets.regreet.image.enable = false;
       };
+
+      stylix.targets.regreet.image.enable = false;
+    };
   };
 }
