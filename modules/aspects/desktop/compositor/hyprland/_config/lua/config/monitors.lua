@@ -14,7 +14,7 @@ local monitor_scales = {}
 hl.monitor({
     output = "",
     mode = "preferred",
-    position = "auto",
+    position = "auto-up",
     scale = 1,
 })
 
@@ -73,7 +73,7 @@ local function apply_monitor_scales(monitors)
             monitor_rules[monitor.name] = hl.monitor({
                 output = monitor.name,
                 mode = "preferred",
-                position = "auto",
+                position = "auto-up",
                 scale = scale,
             })
             monitor_scales[monitor.name] = scale
