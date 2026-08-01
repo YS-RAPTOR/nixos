@@ -104,6 +104,7 @@
             set -g status off
             set-option -g exit-empty on
             set -s extended-keys on
+            set -g extended-keys-format csi-u
             set -as terminal-features 'xterm*:extkeys'
 
             bind-key -T copy-mode-vi v send-keys -X begin-selection

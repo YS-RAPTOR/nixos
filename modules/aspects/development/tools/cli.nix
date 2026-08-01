@@ -2,6 +2,7 @@
   den.aspects.development.tools.cli.homeManager = { pkgs, ... }: {
     home.packages = [
       pkgs.fd
+      pkgs.gnumake
       pkgs.jq
       pkgs.lsof
       pkgs.ripgrep

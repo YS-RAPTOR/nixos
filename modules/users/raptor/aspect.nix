@@ -53,7 +53,7 @@
     den.aspects.development.agents.claude-code
     den.aspects.development.agents.codex
     den.aspects.development.agents.opencode.desktop
-    den.aspects.development.agents.pi
+    (den.batteries.development.agents.pi { source = "local"; })
     den.aspects.development.agents.t3-code
     den.aspects.development.agents.opencode
     den.aspects.operations.raptor-cli

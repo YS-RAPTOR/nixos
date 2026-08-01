@@ -3,6 +3,7 @@
     home.packages = [
       pkgs.bun
       pkgs.nodejs
+      pkgs.deno
     ];
   };
 }
