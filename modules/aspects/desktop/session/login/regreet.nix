@@ -4,7 +4,7 @@
     nixos = {
       services.accounts-daemon.enable = true;
 
-      programs.regreet = {
+      services.displayManager.regreet = {
         enable = true;
 
         settings = {
