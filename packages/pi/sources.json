@@ -1,9 +1,11 @@
 {
-    "platforms": {
-        "x86_64-linux": {
-            "version": "0.83.0",
-            "url": "https://github.com/earendil-works/pi/releases/download/v0.83.0/pi-linux-x64.tar.gz",
-            "hash": "sha256-sGJetiMZewr+IMhw0h7y80SB8VBOV3ffP2mKZsdjb18="
-        }
+    "version": "0.83.0",
+    "url": "https://registry.npmjs.org/@earendil-works/pi-coding-agent/-/pi-coding-agent-0.83.0.tgz",
+    "hash": "sha512-uYhF+FsZxogoSX/AxBcUdiY+ZklubwaXyAoEGA2eQwsHcyEAhUYIKh/WLXe/a8+k8eTCmxb+ZN2Zo9mzQtzbWw==",
+    "npmDepsHash": "sha256-G8+n5dBfPI/nDn3j975yaLZaC6u13IEyzMcnkp2xKmQ=",
+    "dependencyIntegrities": {
+        "@earendil-works/pi-agent-core": "sha512-RorGp9OH5l3ElpuC5a5ZQ2eWcchZGXflXRzVGkV99y3y6tT+LLNyxoYIdVKvTKWEObwhExeQbTH0fI2tE4iX4g==",
+        "@earendil-works/pi-ai": "sha512-m3IZD4g3er0V8TC9+Vpgw/sjTKqcJlkcIBy/JvsgRubuuik3tAVzyugUg4rVrShIkkOT69mEd34NEqKUIsl6JQ==",
+        "@earendil-works/pi-tui": "sha512-IoYrb0rORjELmEpNtoCA/U8je3KopMkRAVJRdSzvXRvgb+Huo1gNh8Q5CSZvNOiYtDxJdj2tYZZHZ4B3+IN3hA=="
     }
 }

@@ -1,4 +1,5 @@
 {
+    "type": "github-release",
     "repository": "wombatwisdom/wombat",
     "assets": {
         "x86_64-linux": "wombat_Linux_x86_64.tar.gz",

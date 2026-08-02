@@ -1,4 +1,5 @@
 {
+    "type": "github-release",
     "repository": "anomalyco/opencode",
     "assets": {
         "x86_64-linux": "opencode-linux-x64.tar.gz",

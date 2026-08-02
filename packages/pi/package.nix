@@ -1,52 +1,77 @@
 {
-  autoPatchelfHook,
+  buildNpmPackage,
   fetchurl,
+  jq,
   lib,
   makeWrapper,
+  nodejs_24,
   ripgrep,
-  stdenv,
+  versionCheckHook,
+  writableTmpDirAsHomeHook,
 }:
 let
-  sources = builtins.fromJSON (builtins.readFile ./sources.json);
-  source =
-    sources.platforms.${stdenv.hostPlatform.system} or (throw "pi: unsupported system ${stdenv.hostPlatform.system}");
+  source = builtins.fromJSON (builtins.readFile ./sources.json);
+  dependencyIntegrities = source.dependencyIntegrities;
 in
-stdenv.mkDerivation {
+buildNpmPackage {
   pname = "pi";
   inherit (source) version;
 
   src = fetchurl { inherit (source) url hash; };
+  npmDepsHash = source.npmDepsHash;
+  nodejs = nodejs_24;
 
-  dontStrip = true;
-  sourceRoot = "pi";
+  postPatch = ''
+    ${lib.getExe jq} 'del(.devDependencies)' package.json > package.json.patched
+    mv package.json.patched package.json
 
-  nativeBuildInputs = [ makeWrapper ] ++ lib.optionals stdenv.hostPlatform.isLinux [ autoPatchelfHook ];
+    ${lib.getExe jq} \
+      --arg agentCore '${dependencyIntegrities."@earendil-works/pi-agent-core"}' \
+      --arg ai '${dependencyIntegrities."@earendil-works/pi-ai"}' \
+      --arg tui '${dependencyIntegrities."@earendil-works/pi-tui"}' \
+      '
+        .packages["node_modules/@earendil-works/pi-agent-core"].integrity = $agentCore |
+        .packages["node_modules/@earendil-works/pi-ai"].integrity = $ai |
+        .packages["node_modules/@earendil-works/pi-tui"].integrity = $tui
+      ' \
+      npm-shrinkwrap.json > npm-shrinkwrap.json.patched
+    mv npm-shrinkwrap.json.patched npm-shrinkwrap.json
 
-  buildInputs = lib.optionals stdenv.hostPlatform.isLinux [ stdenv.cc.cc.lib ];
-
-  installPhase = ''
-    runHook preInstall
-
-    mkdir -p "$out/libexec/pi" "$out/bin"
-    cp -r . "$out/libexec/pi"
-    chmod +x "$out/libexec/pi/pi"
-
-    makeWrapper "$out/libexec/pi/pi" "$out/bin/pi" \
-        --argv0 pi \
-        --prefix PATH : ${lib.makeBinPath [ ripgrep ]}
-
-    install -Dm644 README.md "$out/share/doc/pi/README.md"
-    install -Dm644 CHANGELOG.md "$out/share/doc/pi/CHANGELOG.md"
-
-    runHook postInstall
+    substituteInPlace dist/modes/interactive/interactive-mode.js \
+      --replace-fail \
+        '{ openUrl: openBrowser }' \
+        '{ openUrl: openBrowser, wheelScrollLines: 3 }'
   '';
 
+  dontNpmBuild = true;
+  dontNpmPrune = true;
+  npmInstallFlags = [
+    "--ignore-scripts"
+    "--omit=dev"
+  ];
+  npmRebuildFlags = [ "--ignore-scripts" ];
+
+  nativeBuildInputs = [ makeWrapper ];
+
+  postFixup = ''
+    wrapProgram "$out/bin/pi" \
+      --prefix PATH : ${lib.makeBinPath [ ripgrep ]}
+  '';
+
+  doInstallCheck = true;
+  nativeInstallCheckInputs = [
+    versionCheckHook
+    writableTmpDirAsHomeHook
+  ];
+  versionCheckKeepEnvironment = [ "HOME" ];
+  versionCheckProgram = "${placeholder "out"}/bin/pi";
+  versionCheckProgramArg = "--version";
+
   meta = {
-    description = "Coding agent CLI with file, shell, and session tools";
+    description = "Coding agent CLI with read, bash, edit, write tools and session management";
     homepage = "https://github.com/earendil-works/pi";
+    changelog = "https://github.com/earendil-works/pi/blob/v${source.version}/packages/coding-agent/CHANGELOG.md";
     license = lib.licenses.mit;
     mainProgram = "pi";
-    platforms = builtins.attrNames sources.platforms;
-    sourceProvenance = [ lib.sourceTypes.binaryNativeCode ];
   };
 }

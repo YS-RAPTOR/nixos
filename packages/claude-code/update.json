@@ -1,4 +1,5 @@
 {
+    "type": "github-release",
     "repository": "anthropics/claude-code",
     "assets": {
         "x86_64-linux": "claude-linux-x64.tar.gz",

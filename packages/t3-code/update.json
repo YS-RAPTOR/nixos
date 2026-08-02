@@ -1,4 +1,5 @@
 {
+    "type": "github-release",
     "repository": "pingdotgg/t3code",
     "tagPattern": "-nightly.",
     "assets": {

@@ -1,9 +1,9 @@
 {
-    "repository": "earendil-works/pi",
-    "assets": {
-        "x86_64-linux": "pi-linux-x64.tar.gz",
-        "aarch64-linux": "pi-linux-arm64.tar.gz",
-        "x86_64-darwin": "pi-darwin-x64.tar.gz",
-        "aarch64-darwin": "pi-darwin-arm64.tar.gz"
-    }
+    "type": "npm",
+    "package": "@earendil-works/pi-coding-agent",
+    "integrityDependencies": [
+        "@earendil-works/pi-agent-core",
+        "@earendil-works/pi-ai",
+        "@earendil-works/pi-tui"
+    ]
 }
