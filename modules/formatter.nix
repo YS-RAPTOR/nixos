@@ -35,6 +35,8 @@ in
       "references/**"
       "**/_references/**"
     ];
+    programs.gofmt.enable = true;
+
     programs.nixfmt = {
       enable = true;
       indent = nixIndent;

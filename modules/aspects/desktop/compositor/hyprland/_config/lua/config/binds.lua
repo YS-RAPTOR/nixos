@@ -9,8 +9,17 @@ local function open_terminal()
     local initial_title = window and window.initial_title or ""
     local directory = os.getenv("HOME") or "."
     local is_terminal = initial_title == runtime.terminal_window_title and "1" or "0"
+    local active_window_pid = window and window.pid or 0
 
-    hl.exec_cmd(runtime.terminal_session .. " " .. commands.quote(directory) .. " " .. commands.quote(is_terminal))
+    hl.exec_cmd(
+        runtime.terminal_session
+            .. " "
+            .. commands.quote(directory)
+            .. " "
+            .. commands.quote(is_terminal)
+            .. " "
+            .. commands.quote(active_window_pid)
+    )
 end
 
 local function scroll_or_default(scroll_dispatcher, default_dispatcher)
