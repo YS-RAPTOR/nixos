@@ -4,6 +4,9 @@
     "integrityDependencies": [
         "@earendil-works/pi-agent-core",
         "@earendil-works/pi-ai",
+        "@earendil-works/pi-client",
+        "@earendil-works/pi-protocol",
+        "@earendil-works/pi-telemetry",
         "@earendil-works/pi-tui"
     ]
 }

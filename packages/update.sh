@@ -213,20 +213,20 @@ update_package() {
     echo "Updating $package ($update_type)..."
 
     case "$update_type" in
-        github-release)
-            update_github_release "$package" "$config" "$sources"
-            ;;
-        npm)
-            update_npm "$package" "$config" "$sources"
-            ;;
-        "")
-            echo "Missing update type for package: $package" >&2
-            return 1
-            ;;
-        *)
-            echo "Unsupported update type for $package: $update_type" >&2
-            return 1
-            ;;
+    github-release)
+        update_github_release "$package" "$config" "$sources"
+        ;;
+    npm)
+        update_npm "$package" "$config" "$sources"
+        ;;
+    "")
+        echo "Missing update type for package: $package" >&2
+        return 1
+        ;;
+    *)
+        echo "Unsupported update type for $package: $update_type" >&2
+        return 1
+        ;;
     esac
 
     build_package "$package"

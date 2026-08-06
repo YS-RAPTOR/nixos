@@ -26,13 +26,12 @@ buildNpmPackage {
     mv package.json.patched package.json
 
     ${lib.getExe jq} \
-      --arg agentCore '${dependencyIntegrities."@earendil-works/pi-agent-core"}' \
-      --arg ai '${dependencyIntegrities."@earendil-works/pi-ai"}' \
-      --arg tui '${dependencyIntegrities."@earendil-works/pi-tui"}' \
+      --argjson integrities ${lib.escapeShellArg (builtins.toJSON dependencyIntegrities)} \
       '
-        .packages["node_modules/@earendil-works/pi-agent-core"].integrity = $agentCore |
-        .packages["node_modules/@earendil-works/pi-ai"].integrity = $ai |
-        .packages["node_modules/@earendil-works/pi-tui"].integrity = $tui
+        reduce ($integrities | to_entries[]) as $dependency (
+          .;
+          .packages["node_modules/\($dependency.key)"].integrity = $dependency.value
+        )
       ' \
       npm-shrinkwrap.json > npm-shrinkwrap.json.patched
     mv npm-shrinkwrap.json.patched npm-shrinkwrap.json
@@ -53,9 +52,15 @@ buildNpmPackage {
 
   nativeBuildInputs = [ makeWrapper ];
 
+  postInstall = ''
+    ${nodejs_24}/bin/node ${./patch-scrollbar.mjs} \
+      "$out/lib/node_modules/@earendil-works/pi-coding-agent/node_modules/@earendil-works/pi-tui/dist/layout.js"
+  '';
+
   postFixup = ''
     wrapProgram "$out/bin/pi" \
-      --prefix PATH : ${lib.makeBinPath [ ripgrep ]}
+      --prefix PATH : ${lib.makeBinPath [ ripgrep ]} \
+      --add-flags "--exclude-tools bash"
   '';
 
   doInstallCheck = true;
