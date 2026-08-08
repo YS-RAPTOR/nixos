@@ -1,0 +1,41 @@
+[build-system]
+requires = ["uv_build>=0.11.28,<0.13"]
+build-backend = "uv_build"
+
+[project]
+name = "pia-vpn"
+version = "0.1.0"
+description = "Private Internet Access WireGuard controller and CLI"
+requires-python = ">=3.11"
+license = "MIT"
+dependencies = [
+  "aiohttp>=3.14.3,<4",
+  "certifi>=2026.2.25",
+  "click>=8.3.3,<9",
+  "pydantic>=2.13.4,<3",
+]
+
+[project.scripts]
+pia-vpn = "pia_vpn.cli:main"
+pia-vpn-controller = "pia_vpn.controller:main"
+pia-vpn-credential-helper = "pia_vpn.credentials:main"
+
+[dependency-groups]
+dev = [
+  "pyright>=1.1.411,<2",
+  "pytest>=9,<10",
+  "ruff>=0.16.2,<0.17",
+]
+
+[tool.uv.build-backend]
+module-name = "pia_vpn"
+module-root = "src"
+source-include = ["tests/**"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+
+[tool.pyright]
+include = ["src", "tests"]
+extraPaths = ["src"]

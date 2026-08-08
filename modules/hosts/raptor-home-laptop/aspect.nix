@@ -5,6 +5,11 @@
       den.aspects.system.locale
       den.aspects.system.boot.efi-grub
       den.aspects.services.networking.networkmanager
+      (den.batteries.services.networking.pia {
+        region = "nz";
+        autoStart = true;
+        killSwitch = true;
+      })
       den.aspects.services.audio.pipewire
       den.aspects.services.bluetooth
       den.aspects.services.printing.cups

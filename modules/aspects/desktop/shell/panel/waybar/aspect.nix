@@ -90,172 +90,170 @@
           package = inputs.waybar.packages.${pkgs.stdenv.hostPlatform.system}.default;
           systemd.enable = true;
 
-          settings = [
-            {
-              layer = "top";
-              position = "top";
-              reload_style_on_change = true;
+          settings.mainBar = {
+            layer = "top";
+            position = "top";
+            reload_style_on_change = true;
 
-              modules-left = [
-                "custom/logo"
-                "clock"
+            modules-left = [
+              "custom/logo"
+              "clock"
+            ];
+            modules-center = [ "hyprland/workspaces" ];
+            modules-right = [
+              "tray"
+              "custom/clipboard"
+              "backlight"
+              "custom/colorpicker"
+              "bluetooth"
+              "pulseaudio"
+              "network"
+              "battery"
+            ];
+
+            "hyprland/workspaces" = {
+              format = "{icon}";
+              on-click = "activate";
+              format-icons = {
+                active = "";
+                visible = "";
+                persistent = "";
+                empty = "";
+                default = "";
+              };
+            };
+
+            "custom/logo" = {
+              format = "{}";
+              return-type = "json";
+              exec = "${tmuxStatus}/bin/waybar-tmux-status";
+            };
+
+            clock = {
+              tooltip = false;
+              interval = 1;
+              format = "{:%a %d %b %Y 󰥔 %H:%M}";
+            };
+
+            "custom/clipboard" = {
+              format = "";
+              on-click = lib.getExe clipboardMenu;
+            };
+
+            backlight = {
+              device = "intel_backlight";
+              tooltip = false;
+              format = "<span font='12'>{icon}</span>";
+              format-icons = [
+                ""
+                ""
+                ""
+                ""
+                ""
+                ""
+                ""
+                ""
+                ""
+                ""
+                ""
+                ""
+                ""
+                ""
               ];
-              modules-center = [ "hyprland/workspaces" ];
-              modules-right = [
-                "tray"
-                "custom/clipboard"
-                "backlight"
-                "custom/colorpicker"
-                "bluetooth"
-                "pulseaudio"
-                "network"
-                "battery"
-              ];
+              on-scroll-down = "display-brightness down";
+              on-scroll-up = "display-brightness up";
+              smooth-scrolling-threshold = 1;
+            };
 
-              "hyprland/workspaces" = {
-                format = "{icon}";
-                on-click = "activate";
-                format-icons = {
-                  active = "";
-                  visible = "";
-                  persistent = "";
-                  empty = "";
-                  default = "";
-                };
-              };
+            "custom/colorpicker" = {
+              format = "{}";
+              return-type = "json";
+              interval = "once";
+              exec = "${colorpicker}/bin/waybar-colorpicker --json";
+              on-click = "${colorpicker}/bin/waybar-colorpicker";
+              signal = 1;
+            };
 
-              "custom/logo" = {
-                format = "{}";
-                return-type = "json";
-                exec = "${tmuxStatus}/bin/waybar-tmux-status";
-              };
+            bluetooth = {
+              format-on = "";
+              format-off = "";
+              format-disabled = "󰂲";
+              format-connected = "󰂴";
+              format-connected-battery = "{device_battery_percentage}% 󰂴";
+              tooltip-format = ''
+                {controller_alias}	{controller_address}
 
-              clock = {
-                tooltip = false;
-                interval = 1;
-                format = "{:%a %d %b %Y 󰥔 %H:%M}";
-              };
+                {num_connections} connected'';
+              tooltip-format-connected = ''
+                {controller_alias}	{controller_address}
 
-              "custom/clipboard" = {
-                format = "";
-                on-click = lib.getExe clipboardMenu;
-              };
+                {num_connections} connected
 
-              backlight = {
-                device = "intel_backlight";
-                tooltip = false;
-                format = "<span font='12'>{icon}</span>";
-                format-icons = [
-                  ""
-                  ""
-                  ""
-                  ""
-                  ""
-                  ""
-                  ""
-                  ""
-                  ""
-                  ""
-                  ""
-                  ""
-                  ""
-                  ""
-                ];
-                on-scroll-down = "display-brightness down";
-                on-scroll-up = "display-brightness up";
-                smooth-scrolling-threshold = 1;
-              };
+                {device_enumerate}'';
+              tooltip-format-enumerate-connected = "{device_alias}\t{device_address}";
+              tooltip-format-enumerate-connected-battery = "{device_alias}\t{device_address}\t{device_battery_percentage}%";
+              on-click = "${bluetoothMenu}/bin/waybar-bluetooth";
+            };
 
-              "custom/colorpicker" = {
-                format = "{}";
-                return-type = "json";
-                interval = "once";
-                exec = "${colorpicker}/bin/waybar-colorpicker --json";
-                on-click = "${colorpicker}/bin/waybar-colorpicker";
-                signal = 1;
-              };
-
-              bluetooth = {
-                format-on = "";
-                format-off = "";
-                format-disabled = "󰂲";
-                format-connected = "󰂴";
-                format-connected-battery = "{device_battery_percentage}% 󰂴";
-                tooltip-format = ''
-                  {controller_alias}	{controller_address}
-
-                  {num_connections} connected'';
-                tooltip-format-connected = ''
-                  {controller_alias}	{controller_address}
-
-                  {num_connections} connected
-
-                  {device_enumerate}'';
-                tooltip-format-enumerate-connected = "{device_alias}\t{device_address}";
-                tooltip-format-enumerate-connected-battery = "{device_alias}\t{device_address}\t{device_battery_percentage}%";
-                on-click = "${bluetoothMenu}/bin/waybar-bluetooth";
-              };
-
-              pulseaudio = {
-                format = "{volume}% {icon}";
-                format-bluetooth = "{volume}% 󰂰";
-                format-muted = "<span font='12'></span>";
-                format-icons = {
-                  headphones = "";
-                  bluetooth = "󰥰";
-                  handsfree = "";
-                  headset = "󱡬";
-                  phone = "";
-                  portable = "";
-                  car = "";
-                  default = [
-                    "🕨"
-                    "🕩"
-                    "🕪"
-                  ];
-                };
-                justify = "center";
-                on-click = "${lib.getExe' pkgs.wireplumber "wpctl"} set-mute @DEFAULT_AUDIO_SINK@ toggle";
-                on-click-right = lib.getExe pkgs.pavucontrol;
-                tooltip-format = "{icon} {volume}%";
-              };
-
-              network = {
-                format-wifi = "";
-                format-ethernet = "";
-                format-disconnected = "";
-                tooltip-format = "{ipaddr}";
-                tooltip-format-wifi = "{essid} ({signalStrength}%)  | {ipaddr}";
-                tooltip-format-ethernet = "{ifname} 🖧 | {ipaddr}";
-                on-click = lib.getExe pkgs.networkmanager_dmenu;
-              };
-
-              battery = {
-                interval = 1;
-                states = {
-                  good = 95;
-                  warning = 30;
-                  critical = 20;
-                };
-                format = "{capacity}% {icon}";
-                format-charging = "{capacity}% 󰂄";
-                format-plugged = "{capacity}% 󰂄 ";
-                format-icons = [
-                  "󰁻"
-                  "󰁼"
-                  "󰁾"
-                  "󰂀"
-                  "󰂂"
-                  "󰁹"
+            pulseaudio = {
+              format = "{volume}% {icon}";
+              format-bluetooth = "{volume}% 󰂰";
+              format-muted = "<span font='12'></span>";
+              format-icons = {
+                headphones = "";
+                bluetooth = "󰥰";
+                handsfree = "";
+                headset = "󱡬";
+                phone = "";
+                portable = "";
+                car = "";
+                default = [
+                  "🕨"
+                  "🕩"
+                  "🕪"
                 ];
               };
+              justify = "center";
+              on-click = "${lib.getExe' pkgs.wireplumber "wpctl"} set-mute @DEFAULT_AUDIO_SINK@ toggle";
+              on-click-right = lib.getExe pkgs.pavucontrol;
+              tooltip-format = "{icon} {volume}%";
+            };
 
-              tray = {
-                icon-size = 14;
-                spacing = 10;
+            network = {
+              format-wifi = "";
+              format-ethernet = "";
+              format-disconnected = "";
+              tooltip-format = "{ipaddr}";
+              tooltip-format-wifi = "{essid} ({signalStrength}%)  | {ipaddr}";
+              tooltip-format-ethernet = "{ifname} 🖧 | {ipaddr}";
+              on-click = lib.getExe pkgs.networkmanager_dmenu;
+            };
+
+            battery = {
+              interval = 1;
+              states = {
+                good = 95;
+                warning = 30;
+                critical = 20;
               };
-            }
-          ];
+              format = "{capacity}% {icon}";
+              format-charging = "{capacity}% 󰂄";
+              format-plugged = "{capacity}% 󰂄 ";
+              format-icons = [
+                "󰁻"
+                "󰁼"
+                "󰁾"
+                "󰂀"
+                "󰂂"
+                "󰁹"
+              ];
+            };
+
+            tray = {
+              icon-size = 14;
+              spacing = 10;
+            };
+          };
 
           style = ''
             * {
