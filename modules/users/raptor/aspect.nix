@@ -15,6 +15,8 @@
     den.aspects.services.credentials
     den.aspects.services.storage.removable-media
     den.aspects.services.networking.openvpn
+    den.aspects.development.computer-use.cua-driver
+    den.aspects.development.computer-use.agent-desktop
     den.aspects.appearance.theme.stylix
     den.aspects.desktop.compositor.hyprland
     den.aspects.appearance.wallpaper.hyprpaper

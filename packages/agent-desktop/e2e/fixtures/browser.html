@@ -1,0 +1,19 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Agent Browser E2E Waiting</title>
+<style>
+  body { font: 24px sans-serif; background: #183f5c; color: white; padding: 60px; }
+  input, button { font: 22px; padding: 12px; margin: 10px; }
+</style>
+<h1>Agent Browser E2E</h1>
+<label>Browser exact value <input id="value" aria-label="Browser exact value"></label>
+<button id="record">Record browser value</button>
+<p id="result">waiting</p>
+<script>
+  record.onclick = () => {
+    result.textContent = value.value;
+    document.title = `Agent Browser E2E Recorded ${value.value}`;
+    localStorage.setItem("agent-e2e-value", value.value);
+    document.cookie = `agent_e2e=${encodeURIComponent(value.value)}; SameSite=Lax`;
+  };
+</script>

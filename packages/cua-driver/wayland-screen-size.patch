@@ -1,0 +1,37 @@
+diff --git a/crates/platform-linux/src/tools/impl_.rs b/crates/platform-linux/src/tools/impl_.rs
+index ec8f91d..6859fcc 100644
+--- a/crates/platform-linux/src/tools/impl_.rs
++++ b/crates/platform-linux/src/tools/impl_.rs
+@@ -6181,10 +6181,13 @@ impl Tool for GetScreenSizeTool {
+         }
+         let result = tokio::task::spawn_blocking(|| {
+-            // X11 reports pixel dimensions; scale factor on X11 is not
+-            // well-defined per-monitor, so report 1.0 (matches DPI-unaware
+-            // assumption).  Wayland/HiDPI X11 callers should query
+-            // `xrandr --query` for true scale.
+-            let (w, h) = x11_screen_size()?;
++            // Query the native output on a pure Wayland session. X11 reports
++            // pixel dimensions; scale factor there is not well-defined
++            // per-monitor, so report 1.0 (matches the DPI-unaware assumption).
++            let (w, h) = if crate::wayland::is_wayland() {
++                crate::wayland::output_dimensions()?
++            } else {
++                x11_screen_size()?
++            };
+             Ok::<(u32, u32, f64), anyhow::Error>((w, h, 1.0))
+         })
+         .await;
+diff --git a/crates/platform-linux/src/wayland/mod.rs b/crates/platform-linux/src/wayland/mod.rs
+index aeff52d..7f50a7a 100644
+--- a/crates/platform-linux/src/wayland/mod.rs
++++ b/crates/platform-linux/src/wayland/mod.rs
+@@ -1222,9 +1222,8 @@ pub fn activate_window_for_input(window_id: u64) -> anyhow::Result<()> {
+ /// fallback (which never opens a `VptrSession`) to reproduce the vptr path's
+ /// default-to-centre and clamp behaviour so both backends treat coordinates
+ /// identically. Falls back to `(1, 1)` when no output reports a mode.
+-#[cfg(feature = "portal-input")]
+-fn output_dimensions() -> anyhow::Result<(u32, u32)> {
++pub fn output_dimensions() -> anyhow::Result<(u32, u32)> {
+     let conn = Connection::connect_to_env()?;
+     let mut queue = conn.new_event_queue::<State>();
+     let qh = queue.handle();

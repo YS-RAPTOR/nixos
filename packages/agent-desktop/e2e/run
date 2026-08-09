@@ -1,0 +1,629 @@
+#!/usr/bin/env bash
+set -uo pipefail
+
+HERE=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
+if [[ ${AGENT_DESKTOP_E2E_SHELL:-} != 1 ]]; then
+  exec nix-shell "$HERE/shell.nix" --run "exec $(printf '%q ' "$0" "$@")"
+fi
+
+SCENARIOS=(B-001 B-010 B-020 B-030 B-040 B-050 B-060 B-070 B-080 B-090 B-100 B-110 B-120)
+SELECTED=()
+KEEP_EVIDENCE=0
+EVIDENCE_OVERRIDE=
+usage() {
+  cat <<'EOF'
+Usage: ./e2e/run [OPTIONS]
+
+Run the activated-system Agent Desktop behavior suite.
+
+Options:
+  --scenario ID       Run one scenario (repeatable)
+  --evidence PATH     Write evidence to PATH
+  --keep-evidence     Keep evidence even when every scenario passes
+  --list              List scenario IDs
+  -h, --help          Show this help
+EOF
+}
+while (($#)); do
+  case $1 in
+    --scenario) [[ $# -ge 2 ]] || { echo "missing scenario ID" >&2; exit 2; }; SELECTED+=("$2"); shift 2 ;;
+    --evidence) [[ $# -ge 2 ]] || { echo "missing evidence path" >&2; exit 2; }; EVIDENCE_OVERRIDE=$2; shift 2 ;;
+    --keep-evidence) KEEP_EVIDENCE=1; shift ;;
+    --list) printf '%s\n' "${SCENARIOS[@]}"; exit ;;
+    -h|--help) usage; exit ;;
+    *) echo "unknown option: $1" >&2; usage >&2; exit 2 ;;
+  esac
+done
+if ((${#SELECTED[@]})); then
+  for selected in "${SELECTED[@]}"; do
+    [[ " ${SCENARIOS[*]} " == *" $selected "* ]] || { echo "unknown scenario: $selected" >&2; exit 2; }
+  done
+else
+  SELECTED=("${SCENARIOS[@]}")
+fi
+
+RUN_ID="$(date +%Y%m%d-%H%M%S)-$$"
+PRIMARY="e2e-primary-$RUN_ID"
+SECONDARY="e2e-secondary-$RUN_ID"
+AUXILIARY="e2e-auxiliary-$RUN_ID"
+SCALE_FOUR="e2e-scale-four-$RUN_ID"
+SCALE_FIVE="e2e-scale-five-$RUN_ID"
+CRASH="e2e-crash-$RUN_ID"
+EXPIRY="e2e-expiry-$RUN_ID"
+CANCEL="e2e-cancel-$RUN_ID"
+EVIDENCE=${EVIDENCE_OVERRIDE:-/tmp/agent-desktop-e2e-$RUN_ID}
+install -d -m 0700 "$EVIDENCE"
+RESULTS="$EVIDENCE/results.tsv"
+: > "$RESULTS"
+chmod 0600 "$RESULTS"
+FAILURES=0
+CURRENT=
+CONFIG=${AGENT_DESKTOP_CONFIG:-$HOME/.config/agent-desktop/config.json}
+FIXTURE="$HERE/fixtures/native-dialog.sh"
+BROWSER_FIXTURE="$HERE/fixtures/browser.html"
+PORTAL_CLIENT="$EVIDENCE/portal-capture"
+GOLDEN=
+
+record() {
+  local status=$1 detail=${2:-}
+  printf '%s\t%s\t%s\n' "$CURRENT" "$status" "$detail" >> "$RESULTS"
+  [[ $status == PASS ]] || ((FAILURES += 1))
+}
+run_scenario() {
+  CURRENT=$1
+  printf '\n== %s ==\n' "$CURRENT"
+  set +e
+  "scenario_${CURRENT#B-}"
+  local status=$?
+  set -e
+  if ((status == 0)); then record PASS; else record FAIL "exit=$status"; fi
+  return 0
+}
+selected() { [[ " ${SELECTED[*]} " == *" $1 "* ]]; }
+json() {
+  python3 - "$1" "$2" <<'PY'
+import json
+import sys
+
+value = json.load(open(sys.argv[1]))
+for key in sys.argv[2].split('.'):
+    value = value[key]
+print(json.dumps(value) if isinstance(value, (dict, list)) else value)
+PY
+}
+wait_for_file() { local path=$1; for _ in $(seq 1 200); do [[ -s $path ]] && return; sleep .05; done; return 1; }
+wait_for_exit() { local pid=$1 attempts=${2:-200}; for _ in $(seq 1 "$attempts"); do kill -0 "$pid" 2>/dev/null || return 0; sleep .05; done; return 1; }
+wait_for_window() {
+  local socket=$1 title=$2 output=$3 cua
+  cua=$(json "$CONFIG" commands.cua)
+  for _ in $(seq 1 200); do
+    "$cua" call list_windows '{}' --socket "$socket" > "$output" 2>&1 || true
+    grep -Fq "$title" "$output" && return
+    sleep .05
+  done
+  return 1
+}
+session_sway() {
+  XDG_RUNTIME_DIR="$(json "$EVIDENCE/B-020-create.json" runtime_dir)" \
+    SWAYSOCK="$(json "$EVIDENCE/B-020-create.json" sway_socket)" \
+    "$(json "$CONFIG" commands.swaymsg)" "$1"
+}
+close_fixture() {
+  local title=$1 pid=$2 socket windows target window
+  socket=$(json "$EVIDENCE/B-020-create.json" cua_socket)
+  windows="$EVIDENCE/.close-$pid-windows.json"
+  target="$EVIDENCE/.close-$pid-target.json"
+  wait_for_window "$socket" "$title" "$windows" || return
+  "$HERE/helpers/json_output.py" window "$windows" "$title" > "$target" || return
+  window=$(json "$target" window_id)
+  session_sway "[con_id=$window] kill" >/dev/null || return
+  rm -f "$windows" "$target"
+  wait_for_exit "$pid"
+}
+cleanup_session() {
+  local id=$1 state
+  state=$(agent-desktop status "$id" --json 2>/dev/null) || true
+  [[ -n $state ]] || return 0
+  if jq -e '.state=="failed" or .state=="stopped"' <<<"$state" >/dev/null; then
+    local runtime="/run/user/$(id -u)/agent-desktop/$id" target
+    while read -r target; do
+      if [[ $target == "$runtime" || $target == "$runtime/"* ]]; then
+        /run/wrappers/bin/fusermount3 -u -z "$target" >/dev/null 2>&1 || true
+      fi
+    done < <(findmnt -rn -o TARGET | sort -r)
+    agent-desktop-cleanup --config "$CONFIG" --session-id "$id" >/dev/null 2>&1 || true
+    rm -rf -- "$runtime" 2>/dev/null || true
+  else
+    agent-desktop destroy "$id" --json >/dev/null 2>&1 || true
+  fi
+}
+cleanup() {
+  set +e
+  for id in "$PRIMARY" "$SECONDARY" "$AUXILIARY" "$SCALE_FOUR" "$SCALE_FIVE" "$CRASH" "$EXPIRY" "$CANCEL"; do cleanup_session "$id"; done
+  agent-desktop list --all --json 2>/dev/null > "$EVIDENCE/.cleanup-sessions.json" || true
+  python3 - "$RUN_ID" "$EVIDENCE/.cleanup-sessions.json" <<'PY' || true
+import json
+import subprocess
+import sys
+
+run_id = sys.argv[1]
+try:
+    sessions = json.load(open(sys.argv[2]))
+except Exception:
+    sessions = []
+for session in sessions:
+    session_id = str(session.get("id", ""))
+    if run_id in session_id and session.get("state") != "stopped":
+        subprocess.run(
+            ["agent-desktop", "destroy", session_id, "--json"],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
+PY
+  rm -f "$EVIDENCE/.cleanup-sessions.json"
+  systemctl --user stop agent-desktop-viewer.service >/dev/null 2>&1 || true
+  if [[ -n ${AGENT_DESKTOP_E2E_SECRET_TOOL:-} ]]; then
+    for key in "$RUN_ID" "$RUN_ID-a" "$RUN_ID-b"; do
+      "$AGENT_DESKTOP_E2E_SECRET_TOOL" clear agent_desktop_e2e "$key" >/dev/null 2>&1 || true
+    done
+  fi
+  while read -r target; do [[ -n $target ]] && /run/wrappers/bin/fusermount3 -u -z "$target" || true; done \
+    < <(findmnt -rn -o TARGET 2>/dev/null | grep -F "$RUN_ID" | sort -r || true)
+  rm -f /tmp/out.png
+  python3 - "$EVIDENCE" "$RUN_ID" <<'PY'
+from pathlib import Path
+import re
+import sys
+
+root, run = Path(sys.argv[1]), sys.argv[2]
+for path in root.rglob('*'):
+    if not path.is_file():
+        continue
+    try:
+        text = path.read_text()
+    except (OSError, UnicodeDecodeError):
+        continue
+    for suffix in ('', '-a', '-b'):
+        text = text.replace(f'shared-secret-{run}{suffix}', '<redacted-test-secret>')
+    text = re.sub(r'(#token=)[A-Za-z0-9_-]{20,}', r'\1<redacted>', text)
+    text = re.sub(r'([?&]token=)[A-Za-z0-9_%=-]{20,}', r'\1<redacted>', text)
+    path.write_text(text)
+PY
+  chmod -R go-rwx "$EVIDENCE" 2>/dev/null || true
+}
+trap cleanup EXIT INT TERM
+
+preflight() {
+  [[ -r $CONFIG ]] || { echo "configuration unavailable: $CONFIG" >&2; return 1; }
+  for command in agent-desktop curl findmnt hyprctl jq ss systemctl; do command -v "$command" >/dev/null || return 1; done
+  [[ $(id -u) -ne 0 ]] || { echo "run as the interactive user, not root" >&2; return 1; }
+  agent-desktop list --json > "$EVIDENCE/preflight-list.json" || return 1
+  if jq -e --arg run "$RUN_ID" '.[] | select(.id | contains($run))' "$EVIDENCE/preflight-list.json" >/dev/null; then return 1; fi
+  GOLDEN=$(json "$CONFIG" vivaldi_golden_profile)
+  printf '%s\n' "$RUN_ID" > "$EVIDENCE/run-id"
+  readlink -f /run/current-system > "$EVIDENCE/current-system"
+  readlink -f /run/booted-system > "$EVIDENCE/booted-system"
+  hyprctl activewindow -j > "$EVIDENCE/host-focus-before.json"
+  hyprctl clients -j > "$EVIDENCE/host-windows-before.json"
+  env | sort > "$EVIDENCE/host-environment-before.txt"
+  "$HERE/helpers/profile_manifest.py" "$GOLDEN" > "$EVIDENCE/golden-before.json"
+  local compile_flags
+  read -r -a compile_flags <<< "$(pkg-config --cflags --libs libportal gstreamer-1.0)"
+  cc -Wall -Wextra -O2 "$HERE/helpers/portal_capture.c" -o "$PORTAL_CLIENT" "${compile_flags[@]}"
+}
+
+scenario_001() {
+  agent-desktop --help > "$EVIDENCE/B-001-help.txt" || return
+  for command in create status list exec browser view destroy; do grep -Eq "^  ${command}[[:space:]]" "$EVIDENCE/B-001-help.txt" || return 1; done
+  local deployed expected configured_limit
+  deployed=$(json "$CONFIG" commands.cua)
+  expected="$(nix build --no-link --print-out-paths "$HERE/../../..#cua-driver" 2>/dev/null | tail -1)/bin/cua-driver"
+  [[ $deployed == "$expected" ]] || return
+  configured_limit=$(json "$CONFIG" max_sessions 2>/dev/null || true)
+  [[ -z $configured_limit || $configured_limit == null ]]
+}
+
+scenario_010() {
+  [[ -f $GOLDEN/.agent-desktop-ready ]] || return
+  [[ $(stat -c %a "$GOLDEN/.agent-desktop-ready") == 600 ]] || return
+  if find "$GOLDEN" \( -name 'Singleton*' -o -name DevToolsActivePort -o -name 'Crash Reports' \) -print -quit | grep -q .; then return 1; fi
+  if ps -eo args= | awk -v profile="$GOLDEN" 'index($0, "vivaldi") && index($0, "--user-data-dir=" profile) { found=1 } END { exit !found }'; then return 1; fi
+  systemctl is-enabled "agent-desktop-vivaldi-golden-$(id -un).service" >/dev/null || return
+  systemctl show "agent-desktop-vivaldi-golden-$(id -un).service" -p Result --value | grep -qx success
+}
+
+scenario_020() {
+  local start end delayed_config delayed_session gate starting_id creator
+  start=$(date +%s%N)
+  agent-desktop create e2e-owner --session-id "$PRIMARY" --json > "$EVIDENCE/B-020-create.json" || return
+  end=$(date +%s%N)
+  jq -e --arg id "$PRIMARY" '.id==$id and .state=="ready"' "$EVIDENCE/B-020-create.json" >/dev/null || return
+  printf 'milliseconds=%s\n' "$(((end-start)/1000000))" > "$EVIDENCE/B-020-timing.txt"
+  agent-desktop status "$PRIMARY" --json > "$EVIDENCE/B-020-status.json"
+  agent-desktop list --json > "$EVIDENCE/B-020-list.json"
+  jq -e --arg id "$PRIMARY" '.[] | select(.id==$id and .state=="ready")' "$EVIDENCE/B-020-list.json" >/dev/null || return
+
+  # Delay the worker behind the public control plane and require the observable
+  # lifecycle to remain `starting` until the gate opens.
+  starting_id="e2e-starting-$RUN_ID"; gate="$EVIDENCE/B-020-start-gate"; delayed_session="$EVIDENCE/B-020-delayed-session"
+  delayed_config="$EVIDENCE/B-020-delayed-config.json"
+  cat > "$delayed_session" <<EOF
+#!/usr/bin/env bash
+while [[ ! -e "$gate" ]]; do sleep .02; done
+exec "$(json "$CONFIG" commands.session)" "\$@"
+EOF
+  chmod 0700 "$delayed_session"
+  python3 - "$CONFIG" "$delayed_config" "$delayed_session" <<'PY'
+import json
+import sys
+
+value = json.load(open(sys.argv[1]))
+value["commands"]["session"] = sys.argv[3]
+json.dump(value, open(sys.argv[2], "w"))
+PY
+  agent-desktop --config "$delayed_config" create e2e-starting --session-id "$starting_id" --json > "$EVIDENCE/B-020-starting-create.json" 2> "$EVIDENCE/B-020-starting-create.err" &
+  creator=$!
+  for _ in $(seq 1 200); do
+    agent-desktop --config "$delayed_config" status "$starting_id" --json > "$EVIDENCE/B-020-starting-status.json" 2>/dev/null || true
+    jq -e '.state=="starting"' "$EVIDENCE/B-020-starting-status.json" >/dev/null 2>&1 && break
+    sleep .025
+  done
+  jq -e '.state=="starting"' "$EVIDENCE/B-020-starting-status.json" >/dev/null || { kill "$creator" 2>/dev/null || true; return 1; }
+  touch "$gate"; wait "$creator" || return
+  agent-desktop --config "$delayed_config" destroy "$starting_id" --json > "$EVIDENCE/B-020-starting-destroy.json" || return
+}
+
+scenario_030() {
+  [[ -f $EVIDENCE/B-020-create.json ]] || scenario_020 || return
+  local oracle pid unit cgroup title
+  title="Agent Desktop E2E Private $RUN_ID"
+  oracle="$EVIDENCE/B-030-oracle.json"
+  agent-desktop exec "$PRIMARY" --json -- env \
+    AGENT_DESKTOP_E2E_ZENITY="$AGENT_DESKTOP_E2E_ZENITY" E2E_FIXTURE_TITLE="$title" \
+    E2E_FIXTURE_OUT="$oracle" "$FIXTURE" > "$EVIDENCE/B-030-launch.json" || return
+  pid=$(json "$EVIDENCE/B-030-launch.json" pid)
+  tr '\0' '\n' < "/proc/$pid/environ" | sort > "$EVIDENCE/B-030-environment.txt"
+  grep -Fq 'XDG_CURRENT_DESKTOP=sway' "$EVIDENCE/B-030-environment.txt" || return
+  grep -Fq 'CUA_DRIVER_RS_TELEMETRY_ENABLED=false' "$EVIDENCE/B-030-environment.txt" || return
+  ! grep -Eq '^(DISPLAY|SSH_AUTH_SOCK|HYPRLAND_INSTANCE_SIGNATURE)=' "$EVIDENCE/B-030-environment.txt" || return
+  unit="agent-desktop-$PRIMARY.service"; cgroup=$(systemctl --user show "$unit" -p ControlGroup --value)
+  grep -Fq "$cgroup" "/proc/$pid/cgroup" || return
+  hyprctl clients -j > "$EVIDENCE/B-030-host-windows.json"
+  ! grep -Fq "$title" "$EVIDENCE/B-030-host-windows.json" || return
+  close_fixture "$title" "$pid" || return
+  wait_for_file "$oracle"
+}
+
+scenario_040() {
+  [[ -f $EVIDENCE/B-020-create.json ]] || scenario_020 || return
+  local value oracle pid
+  value='exact value ; $(not-executed)'; oracle="$EVIDENCE/B-040-oracle.txt"
+  agent-desktop exec "$PRIMARY" --json -- bash -c 'printf %s "$1" > "$2"; printf stdout; printf stderr >&2; sleep 2' \
+    _ "$value" "$oracle" > "$EVIDENCE/B-040-launch.json" || return
+  [[ $(cat "$oracle") == "$value" ]] || return
+  pid=$(json "$EVIDENCE/B-040-launch.json" pid); kill -0 "$pid" || return
+  jq -e '.state=="active"' < <(agent-desktop status "$PRIMARY" --json) >/dev/null || return
+  for _ in $(seq 1 100); do jq -e '.state=="ready"' < <(agent-desktop status "$PRIMARY" --json) >/dev/null 2>&1 && break; sleep .05; done
+  agent-desktop exec "$PRIMARY" -- /definitely/missing/e2e >/dev/null 2> "$EVIDENCE/B-040-missing.txt"; local rc=$?
+  ((rc != 0))
+}
+
+scenario_050() {
+  [[ -f $EVIDENCE/B-020-create.json ]] || scenario_020 || return
+  local profile upper marker cua socket title pid win state entry button value root ex ey bx by
+  profile=$(json "$EVIDENCE/B-020-create.json" browser_profile)
+  upper="$HOME/.local/state/agent-desktop/browser-overlays/$PRIMARY/upper"
+  findmnt -rn -T "$profile" -o FSTYPE | grep -qx fuse.fuse-overlayfs || return
+  marker="e2e-browser-$RUN_ID"; printf marker > "$profile/$marker"
+  [[ -e $upper/$marker && ! -e $GOLDEN/$marker ]] || return
+  agent-desktop browser "$PRIMARY" "file://$BROWSER_FIXTURE" --json > "$EVIDENCE/B-050-browser.json" || return
+  cua=$(json "$CONFIG" commands.cua)
+  socket=$(json "$EVIDENCE/B-020-create.json" cua_socket); title='Agent Browser E2E Waiting'
+  wait_for_window "$socket" "$title" "$EVIDENCE/B-050-windows.json" || return
+  "$HERE/helpers/json_output.py" window "$EVIDENCE/B-050-windows.json" "$title" > "$EVIDENCE/B-050-target.json" || return
+  pid=$(json "$EVIDENCE/B-050-target.json" pid); win=$(json "$EVIDENCE/B-050-target.json" window_id)
+  session_sway "[con_id=$win] focus" >/dev/null || return
+  "$cua" call get_window_state "{\"pid\":$pid,\"window_id\":$win,\"screenshot_out_file\":\"$EVIDENCE/B-050-browser.png\"}" \
+    --socket "$socket" > "$EVIDENCE/B-050-state.json" || return
+  # A stale crash prompt is an acceptance failure even though visual fallback can dismiss it.
+  ! grep -Fq 'Vivaldi encountered a problem' "$EVIDENCE/B-050-state.json" || return
+  entry=$("$HERE/helpers/json_output.py" element "$EVIDENCE/B-050-state.json" 'Browser exact value') || return
+  button=$("$HERE/helpers/json_output.py" element "$EVIDENCE/B-050-state.json" 'Record browser value') || return
+  root=$(jq -c '.elements[0].frame' "$EVIDENCE/B-050-state.json")
+  read -r ex ey < <(jq -r --argjson root "$root" '[.frame.x-$root.x+.frame.w/2,.frame.y-$root.y+.frame.h/2]|@tsv' <<<"$entry")
+  read -r bx by < <(jq -r --argjson root "$root" '[.frame.x-$root.x+.frame.w/2,.frame.y-$root.y+.frame.h/2]|@tsv' <<<"$button")
+  value="browser-visual-$RUN_ID"
+  "$cua" call type_text "{\"pid\":$pid,\"window_id\":$win,\"x\":$ex,\"y\":$ey,\"text\":\"$value\",\"delivery_mode\":\"foreground\"}" --socket "$socket" > "$EVIDENCE/B-050-type.json" || return
+  "$cua" call click "{\"pid\":$pid,\"window_id\":$win,\"x\":$bx,\"y\":$by,\"button\":\"left\",\"delivery_mode\":\"foreground\"}" --socket "$socket" > "$EVIDENCE/B-050-click.json" || return
+  wait_for_window "$socket" "Agent Browser E2E Recorded $value" "$EVIDENCE/B-050-after.json" || return
+  agent-desktop browser "$PRIMARY" --json > "$EVIDENCE/B-050-blank.json" || return
+  jq -e '.arguments[-1]=="about:blank"' "$EVIDENCE/B-050-blank.json" >/dev/null || return
+  agent-desktop browser "$PRIMARY" relative/path >/dev/null 2> "$EVIDENCE/B-050-invalid.txt"; local rc=$?
+  ((rc != 0))
+}
+
+scenario_060() {
+  [[ -f $EVIDENCE/B-020-create.json ]] || scenario_020 || return
+  local cua socket title oracle pid win entry button value
+  cua=$(json "$CONFIG" commands.cua)
+  socket=$(json "$EVIDENCE/B-020-create.json" cua_socket)
+  "$cua" call health_report '{}' --socket "$socket" > "$EVIDENCE/B-060-health.json" || return
+  grep -Fq '"overall": "ok"' "$EVIDENCE/B-060-health.json" || return
+  "$cua" call get_screen_size '{}' --socket "$socket" > "$EVIDENCE/B-060-size.json" || return
+  "$cua" call get_desktop_state "{\"screenshot_out_file\":\"$EVIDENCE/B-060-desktop.png\"}" --socket "$socket" > "$EVIDENCE/B-060-desktop.json" || return
+  title="Agent Desktop E2E Semantic $RUN_ID"; oracle="$EVIDENCE/B-060-oracle.json"
+  agent-desktop exec "$PRIMARY" --json -- env AGENT_DESKTOP_E2E_ZENITY="$AGENT_DESKTOP_E2E_ZENITY" \
+    E2E_FIXTURE_TITLE="$title" E2E_FIXTURE_OUT="$oracle" "$FIXTURE" > "$EVIDENCE/B-060-fixture.json" || return
+  wait_for_window "$socket" "$title" "$EVIDENCE/B-060-windows.json" || return
+  "$HERE/helpers/json_output.py" window "$EVIDENCE/B-060-windows.json" "$title" > "$EVIDENCE/B-060-target.json" || return
+  pid=$(json "$EVIDENCE/B-060-target.json" pid); win=$(json "$EVIDENCE/B-060-target.json" window_id)
+  "$cua" call get_window_state "{\"pid\":$pid,\"window_id\":$win,\"include_screenshot\":false}" --socket "$socket" > "$EVIDENCE/B-060-state.json" || return
+  entry=$("$HERE/helpers/json_output.py" element "$EVIDENCE/B-060-state.json" 'Behaviour value') || return
+  value="cua-semantic-$RUN_ID"
+  "$cua" call type_text "$(jq -cn --argjson pid "$pid" --argjson win "$win" --arg token "$(jq -r .element_token <<<"$entry")" --arg value "$value" '{pid:$pid,window_id:$win,element_token:$token,text:$value,delivery_mode:"foreground"}')" --socket "$socket" > "$EVIDENCE/B-060-type.json" || return
+  "$cua" call get_window_state "{\"pid\":$pid,\"window_id\":$win,\"include_screenshot\":false}" --socket "$socket" > "$EVIDENCE/B-060-state-2.json" || return
+  button=$("$HERE/helpers/json_output.py" element "$EVIDENCE/B-060-state-2.json" 'Record exact value') || return
+  "$cua" call click "$(jq -cn --argjson pid "$pid" --argjson win "$win" --arg token "$(jq -r .element_token <<<"$button")" '{pid:$pid,window_id:$win,element_token:$token,delivery_mode:"foreground"}')" --socket "$socket" > "$EVIDENCE/B-060-click.json" || return
+  wait_for_file "$oracle" || return
+  jq -e --arg value "$value" '.value==$value and .status==0' "$oracle" >/dev/null || return
+  wait_for_exit "$(json "$EVIDENCE/B-060-fixture.json" pid)"
+}
+
+scenario_070() {
+  [[ -f $EVIDENCE/B-020-create.json ]] || scenario_020 || return
+  local pid fixture_pid runtime log launch title oracle socket attempt captured=0
+  # Ensure the captured compositor has non-uniform, application-owned pixels.
+  title="Agent Desktop E2E Portal $RUN_ID"; oracle="$EVIDENCE/B-070-fixture-oracle.json"
+  agent-desktop exec "$PRIMARY" --json -- env AGENT_DESKTOP_E2E_ZENITY="$AGENT_DESKTOP_E2E_ZENITY" \
+    E2E_FIXTURE_TITLE="$title" E2E_FIXTURE_OUT="$oracle" "$FIXTURE" > "$EVIDENCE/B-070-fixture.json" || return
+  fixture_pid=$(json "$EVIDENCE/B-070-fixture.json" pid)
+  socket=$(json "$EVIDENCE/B-020-create.json" cua_socket)
+  wait_for_window "$socket" "$title" "$EVIDENCE/B-070-windows.json" || return
+  runtime=$(json "$EVIDENCE/B-020-create.json" runtime_dir)
+
+  # PipeWire may expose one initial all-black buffer while negotiation settles.
+  # Retry the complete portal capture, but accept only independently validated pixels.
+  for attempt in 1 2 3; do
+    rm -f "$EVIDENCE/B-070-frame.raw" "$EVIDENCE/B-070-screenshot.png"
+    launch="$EVIDENCE/B-070-launch-$attempt.json"
+    agent-desktop exec "$PRIMARY" --json -- env GST_PLUGIN_PATH="$AGENT_DESKTOP_E2E_PIPEWIRE_PLUGIN" \
+      "$PORTAL_CLIENT" "$EVIDENCE/B-070-frame.raw" "$EVIDENCE/B-070-screenshot.png" > "$launch" || continue
+    pid=$(json "$launch" pid)
+    if ! wait_for_exit "$pid" 500; then kill "$pid" 2>/dev/null || true; wait_for_exit "$pid" || true; fi
+    log=$(ls -1t "$runtime"/logs/app-*-env.log 2>/dev/null | head -1) || continue
+    cp "$log" "$EVIDENCE/B-070-client-$attempt.log"
+    if grep -Fq FRAME_CONSUMED "$log" && python3 - "$EVIDENCE/B-070-frame.raw" "$EVIDENCE/B-070-screenshot.png" <<'PY'
+from pathlib import Path
+import struct
+import sys
+
+raw, png = map(lambda path: Path(path).read_bytes(), sys.argv[1:])
+valid_frame = len(raw) == 1280 * 720 * 4 and len(set(raw)) > 16
+valid_png = png[:8] == b'\x89PNG\r\n\x1a\n' and struct.unpack('>II', png[16:24]) == (1280, 720)
+raise SystemExit(not (valid_frame and valid_png))
+PY
+    then
+      cp "$launch" "$EVIDENCE/B-070-launch.json"
+      cp "$log" "$EVIDENCE/B-070-client.log"
+      captured=1
+      break
+    fi
+  done
+  close_fixture "$title" "$fixture_pid" || return
+  ((captured == 1))
+}
+
+scenario_080() {
+  [[ -f $EVIDENCE/B-020-create.json ]] || scenario_020 || return
+  local tool=$AGENT_DESKTOP_E2E_SECRET_TOOL attr=agent_desktop_e2e key=$RUN_ID value="shared-secret-$RUN_ID" pid got suffix client_key client_value
+  "$tool" clear "$attr" "$key" >/dev/null 2>&1 || true
+  agent-desktop exec "$PRIMARY" --json -- bash -c 'printf %s "$1" | "$2" store --label="$3" "$4" "$5"' \
+    _ "$value" "$tool" "Agent Desktop E2E $RUN_ID" "$attr" "$key" > "$EVIDENCE/B-080-store.json" || return
+  pid=$(json "$EVIDENCE/B-080-store.json" pid); for _ in $(seq 1 100); do kill -0 "$pid" 2>/dev/null || break; sleep .05; done
+  got=$($tool lookup "$attr" "$key" 2>/dev/null || true); [[ $got == "$value" ]] || return
+
+  for suffix in a b; do
+    client_key="$key-$suffix"; client_value="shared-secret-$RUN_ID-$suffix"
+    "$tool" clear "$attr" "$client_key" >/dev/null 2>&1 || true
+    agent-desktop exec "$PRIMARY" --json -- bash -c 'printf %s "$1" | "$2" store --label="$3" "$4" "$5"' \
+      _ "$client_value" "$tool" "Agent Desktop E2E $RUN_ID $suffix" "$attr" "$client_key" > "$EVIDENCE/B-080-store-$suffix.json" || return
+  done
+  for suffix in a b; do
+    client_key="$key-$suffix"; client_value="shared-secret-$RUN_ID-$suffix"
+    [[ $($tool lookup "$attr" "$client_key" 2>/dev/null || true) == "$client_value" ]] || return
+  done
+  for client_key in "$key" "$key-a" "$key-b"; do
+    "$tool" clear "$attr" "$client_key" || return
+    ! "$tool" lookup "$attr" "$client_key" >/dev/null 2>&1 || return
+  done
+}
+
+scenario_090() {
+  [[ -f $EVIDENCE/B-020-create.json ]] || scenario_020 || return
+  local url token title oracle cua socket value open_config open_script
+  url=$(agent-desktop view "$PRIMARY" --print) || return
+  token=$(python3 -c 'from urllib.parse import parse_qs,urlsplit;import sys;print(parse_qs(urlsplit(sys.argv[1]).fragment)["token"][0])' "$url")
+  ss -ltn | grep -Fq '127.0.0.1:6080' || return
+  [[ $(curl -sS -o /dev/null -w '%{http_code}' http://127.0.0.1:6080/api/sessions) == 401 ]] || return
+  curl -fsS --get --data-urlencode "token=$token" http://127.0.0.1:6080/api/sessions > "$EVIDENCE/B-090-sessions.json" || return
+  jq -e --arg id "$PRIMARY" '.[]|select(.id==$id and .viewer_available==true)' "$EVIDENCE/B-090-sessions.json" >/dev/null || return
+
+  # Exercise the default browser-opening form without touching the user's browser.
+  open_config="$EVIDENCE/B-090-open-config.json"; open_script="$EVIDENCE/B-090-open-oracle.sh"
+  cat > "$open_script" <<EOF
+#!/usr/bin/env bash
+printf '%s' "\$1" > "$EVIDENCE/B-090-opened-url"
+EOF
+  chmod 0700 "$open_script"
+  python3 - "$CONFIG" "$open_config" "$open_script" <<'PY'
+import json
+import sys
+
+value = json.load(open(sys.argv[1]))
+value["commands"]["xdg_open"] = sys.argv[3]
+json.dump(value, open(sys.argv[2], "w"))
+PY
+  agent-desktop --config "$open_config" view "$PRIMARY" || return
+  grep -Fq "session=$PRIMARY" "$EVIDENCE/B-090-opened-url" || return
+
+  title="Agent Desktop E2E RFB $RUN_ID"; oracle="$EVIDENCE/B-090-oracle.json"
+  agent-desktop exec "$PRIMARY" --json -- env AGENT_DESKTOP_E2E_ZENITY="$AGENT_DESKTOP_E2E_ZENITY" \
+    E2E_FIXTURE_TITLE="$title" E2E_FIXTURE_OUT="$oracle" "$FIXTURE" > "$EVIDENCE/B-090-fixture.json" || return
+  cua=$(json "$CONFIG" commands.cua); socket=$(json "$EVIDENCE/B-020-create.json" cua_socket)
+  wait_for_window "$socket" "$title" "$EVIDENCE/B-090-windows.json" || return
+  session_sway "[title=\"$title\"] focus, fullscreen enable" >/dev/null || return
+  value="rfb-exact-$RUN_ID"
+  python3 "$HERE/helpers/rfb_client.py" http://127.0.0.1:6080 "$PRIMARY" "$token" "$value" "$EVIDENCE/B-090-rfb.json" || return
+  wait_for_file "$oracle" || return
+  jq -e --arg value "$value" '.value==$value and .status==0' "$oracle" >/dev/null || return
+  wait_for_exit "$(json "$EVIDENCE/B-090-fixture.json" pid)" || return
+  systemctl --user stop agent-desktop-viewer.service || return
+  jq -e '.state=="ready" or .state=="active"' < <(agent-desktop status "$PRIMARY" --json) >/dev/null
+}
+
+scenario_100() {
+  [[ -f $EVIDENCE/B-020-create.json ]] || scenario_020 || return
+  agent-desktop create e2e-secondary --session-id "$SECONDARY" --json > "$EVIDENCE/B-100-secondary.json" || return
+  # Five simultaneous sessions guard against reintroducing the former fixed
+  # four-session ceiling. Real OS/service exhaustion must still fail explicitly.
+  agent-desktop create e2e-scale-three --session-id "$AUXILIARY" --json > "$EVIDENCE/B-100-scale-three.json" || return
+  agent-desktop create e2e-scale-four --session-id "$SCALE_FOUR" --json > "$EVIDENCE/B-100-scale-four.json" || return
+  agent-desktop create e2e-scale-five --session-id "$SCALE_FIVE" --json > "$EVIDENCE/B-100-scale-five.json" || return
+  agent-desktop list --json > "$EVIDENCE/B-100-five-sessions.json"
+  jq -e --arg run "$RUN_ID" '[.[]|select((.id|contains($run)) and (.state|IN("ready","active")))]|length>=5' "$EVIDENCE/B-100-five-sessions.json" >/dev/null || return
+  local first second one two
+  first=$(json "$EVIDENCE/B-020-create.json" browser_profile); second=$(json "$EVIDENCE/B-100-secondary.json" browser_profile)
+  [[ $first != "$second" ]] || return
+  one="primary-$RUN_ID"; two="secondary-$RUN_ID"; printf one > "$first/$one"; printf two > "$second/$two"
+  [[ ! -e $first/$two && ! -e $second/$one ]] || return
+  agent-desktop browser "$PRIMARY" "file://$BROWSER_FIXTURE" --json > "$EVIDENCE/B-100-browser-primary.json" || return
+  agent-desktop browser "$SECONDARY" about:blank --json > "$EVIDENCE/B-100-browser-secondary.json" || return
+  agent-desktop destroy "$SECONDARY" --json > "$EVIDENCE/B-100-destroy-secondary.json" || return
+  cleanup_session "$AUXILIARY"; cleanup_session "$SCALE_FOUR"; cleanup_session "$SCALE_FIVE"
+  jq -e '.state=="ready" or .state=="active"' < <(agent-desktop status "$PRIMARY" --json) >/dev/null
+}
+
+scenario_110() {
+  # Cancellation, ordinary destroy, lease expiry, and forced loss are independent.
+  local runtime profile overlay unit main app delayed_config delayed_session gate creator busctl address expiry_state
+
+  gate="$EVIDENCE/B-110-cancel-gate"; delayed_session="$EVIDENCE/B-110-delayed-session"; delayed_config="$EVIDENCE/B-110-cancel-config.json"
+  cat > "$delayed_session" <<EOF
+#!/usr/bin/env bash
+while [[ ! -e "$gate" ]]; do sleep .02; done
+exec "$(json "$CONFIG" commands.session)" "\$@"
+EOF
+  chmod 0700 "$delayed_session"
+  python3 - "$CONFIG" "$delayed_config" "$delayed_session" <<'PY'
+import json
+import sys
+
+value = json.load(open(sys.argv[1]))
+value["commands"]["session"] = sys.argv[3]
+json.dump(value, open(sys.argv[2], "w"))
+PY
+  agent-desktop --config "$delayed_config" create e2e-cancel --session-id "$CANCEL" --json > "$EVIDENCE/B-110-cancel-create.json" 2> "$EVIDENCE/B-110-cancel-create.err" & creator=$!
+  for _ in $(seq 1 200); do
+    agent-desktop --config "$delayed_config" status "$CANCEL" --json > "$EVIDENCE/B-110-cancel-starting.json" 2>/dev/null || true
+    jq -e '.state=="starting"' "$EVIDENCE/B-110-cancel-starting.json" >/dev/null 2>&1 && break
+    sleep .025
+  done
+  jq -e '.state=="starting"' "$EVIDENCE/B-110-cancel-starting.json" >/dev/null || { kill "$creator" 2>/dev/null || true; return 1; }
+  agent-desktop --config "$delayed_config" destroy "$CANCEL" --json > "$EVIDENCE/B-110-cancel-destroy.json" || return
+  touch "$gate"; wait "$creator" >/dev/null 2>&1 || true
+  [[ ! -e "/run/user/$(id -u)/agent-desktop/$CANCEL" ]] || return
+
+  # Shortest valid lease proves automatic expiry without changing the activated config.
+  python3 - "$CONFIG" "$EVIDENCE/B-110-expiry-config.json" <<'PY'
+import json
+import sys
+
+value = json.load(open(sys.argv[1]))
+value["runtime_limit_seconds"] = 60
+json.dump(value, open(sys.argv[2], "w"))
+PY
+  agent-desktop --config "$EVIDENCE/B-110-expiry-config.json" create e2e-expiry --session-id "$EXPIRY" --json > "$EVIDENCE/B-110-expiry-create.json" || return
+  agent-desktop --config "$EVIDENCE/B-110-expiry-config.json" exec "$EXPIRY" --json -- sleep 600 > "$EVIDENCE/B-110-expiry-app.json" || return
+  for _ in $(seq 1 900); do
+    expiry_state=$(systemctl --user show "agent-desktop-$EXPIRY.service" -p ActiveState --value 2>/dev/null || true)
+    [[ $expiry_state == inactive || $expiry_state == failed || -z $expiry_state ]] && break
+    sleep .1
+  done
+  [[ $expiry_state == inactive || $expiry_state == failed || -z $expiry_state ]] || return
+  agent-desktop --config "$EVIDENCE/B-110-expiry-config.json" status "$EXPIRY" --json > "$EVIDENCE/B-110-expiry-status.json" || return
+  jq -e '.state=="stopped" or .state=="failed"' "$EVIDENCE/B-110-expiry-status.json" >/dev/null || return
+
+  agent-desktop create e2e-crash --session-id "$CRASH" --json > "$EVIDENCE/B-110-crash-create.json" || return
+  runtime=$(json "$EVIDENCE/B-110-crash-create.json" runtime_dir); profile=$(json "$EVIDENCE/B-110-crash-create.json" browser_profile)
+  overlay="$HOME/.local/state/agent-desktop/browser-overlays/$CRASH"
+  agent-desktop exec "$CRASH" --json -- sleep 600 > "$EVIDENCE/B-110-crash-app.json" || return
+  # Activate the private document portal so abrupt cleanup must reclaim every
+  # session-owned FUSE mount, not just the browser overlay.
+  busctl=$(json "$CONFIG" commands.busctl); address=$(json "$EVIDENCE/B-110-crash-create.json" dbus_address)
+  "$busctl" --address="$address" call org.freedesktop.portal.Documents /org/freedesktop/portal/documents \
+    org.freedesktop.portal.Documents GetMountPoint > "$EVIDENCE/B-110-document-mount.txt" || return
+  findmnt -rn -M "$runtime/doc" -o FSTYPE | grep -qx fuse.portal || return
+  printf crash-marker > "$profile/e2e-crash-marker"
+  [[ -e $overlay/upper/e2e-crash-marker ]] || return
+  app=$(json "$EVIDENCE/B-110-crash-app.json" pid); unit="agent-desktop-$CRASH.service"; main=$(systemctl --user show "$unit" -p MainPID --value)
+  kill -KILL "$main" || return
+  for _ in $(seq 1 300); do
+    local unit_state
+    unit_state=$(systemctl --user show "$unit" -p ActiveState --value 2>/dev/null || true)
+    [[ $unit_state == inactive || $unit_state == failed || -z $unit_state ]] && break
+    sleep .05
+  done
+  [[ $(systemctl --user show "$unit" -p ActiveState --value 2>/dev/null || true) != active ]] || return
+  agent-desktop status "$CRASH" --json > "$EVIDENCE/B-110-crash-status.json" 2> "$EVIDENCE/B-110-crash-error.txt"; local rc=$?
+  ((rc == 0)) || return
+  jq -e '.state=="failed" and (.message|length>0)' "$EVIDENCE/B-110-crash-status.json" >/dev/null || return
+  [[ ! -e $runtime && ! -e $overlay ]] || return
+  ! findmnt -rn -o TARGET | grep -Fq "$runtime" || return
+  ! kill -0 "$app" 2>/dev/null
+}
+
+scenario_120() {
+  if [[ -f $EVIDENCE/B-020-create.json ]] && agent-desktop status "$PRIMARY" --json >/dev/null 2>&1; then
+    sleep 11
+    local cua socket
+    cua=$(json "$CONFIG" commands.cua); socket=$(json "$EVIDENCE/B-020-create.json" cua_socket)
+    "$cua" call health_report '{}' --socket "$socket" > "$EVIDENCE/B-120-health.json" || return
+  fi
+  cleanup
+  agent-desktop list --json > "$EVIDENCE/B-120-final-list.json"
+  jq -e --arg run "$RUN_ID" '[.[]|select((.id|contains($run)) and (.state|IN("starting","ready","active","stopping")))]|length==0' "$EVIDENCE/B-120-final-list.json" >/dev/null || return
+  ! findmnt -rn -t fuse.fuse-overlayfs -o TARGET | grep -Fq "$RUN_ID" || return
+  ! ps -eo args | grep -F "$RUN_ID" | grep -v grep >/dev/null || return
+  hyprctl clients -j > "$EVIDENCE/B-120-host-windows-after.json"
+  ! grep -Fq "$RUN_ID" "$EVIDENCE/B-120-host-windows-after.json" || return
+  "$HERE/helpers/profile_manifest.py" "$GOLDEN" > "$EVIDENCE/golden-after.json"
+  cmp "$EVIDENCE/golden-before.json" "$EVIDENCE/golden-after.json"
+}
+
+if ! preflight; then
+  echo "E2E preflight failed; evidence: $EVIDENCE" >&2
+  exit 1
+fi
+for scenario in "${SCENARIOS[@]}"; do selected "$scenario" && run_scenario "$scenario"; done
+
+{
+  echo '# Agent Desktop activated-system E2E results'
+  echo
+  echo "Run: \`$RUN_ID\`"
+  echo
+  echo '| Scenario | Result | Detail |'
+  echo '|---|---|---|'
+  while IFS=$'\t' read -r scenario result detail; do printf '| %s | %s | %s |\n' "$scenario" "$result" "$detail"; done < "$RESULTS"
+} > "$EVIDENCE/RESULTS.md"
+chmod 0600 "$EVIDENCE/RESULTS.md"
+cat "$EVIDENCE/RESULTS.md"
+
+if ((FAILURES)); then
+  echo "E2E failed ($FAILURES scenario(s)); evidence: $EVIDENCE" >&2
+  exit 1
+fi
+if ((KEEP_EVIDENCE == 0)) && [[ -z $EVIDENCE_OVERRIDE ]]; then
+  echo "E2E passed; evidence retained for inspection: $EVIDENCE"
+else
+  echo "E2E passed; evidence: $EVIDENCE"
+fi

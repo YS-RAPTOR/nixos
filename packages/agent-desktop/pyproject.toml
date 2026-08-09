@@ -1,0 +1,46 @@
+[build-system]
+requires = ["uv_build>=0.11.28,<0.13"]
+build-backend = "uv_build"
+
+[project]
+name = "agent-desktop"
+version = "0.2.0"
+description = "On-demand private graphical desktop sessions for computer-use agents"
+requires-python = ">=3.11"
+license = "MIT"
+dependencies = [
+  "aiohttp>=3.13.3,<4",
+  "click>=8.3.3,<9",
+  "dbus-next>=0.2.3,<0.3",
+  "pydantic>=2.13.4,<3",
+]
+
+[project.scripts]
+agent-desktop = "agent_desktop.cli:main"
+agent-desktop-session = "agent_desktop.session:main"
+agent-desktop-cleanup = "agent_desktop.session:cleanup_main"
+agent-desktop-viewer = "agent_desktop.viewer:main"
+agent-desktop-secret-bridge = "agent_desktop.secret_bridge:main"
+
+[dependency-groups]
+dev = [
+  "pyright>=1.1.411,<2",
+  "pytest>=9,<10",
+  "ruff>=0.16.2,<0.17",
+]
+
+[tool.uv.build-backend]
+module-name = "agent_desktop"
+module-root = "src"
+source-include = ["tests/**"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+
+[tool.pyright]
+include = ["src", "tests"]
+extraPaths = ["src"]
+
+[tool.ruff]
+line-length = 120

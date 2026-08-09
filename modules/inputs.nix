@@ -6,6 +6,11 @@
       inputs.nixpkgs-wine.follows = "nixpkgs";
     };
 
+    cua = {
+      url = "github:trycua/cua";
+      inputs.nixpkgs.follows = "nixpkgs-stable";
+    };
+
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     nixpkgs-stable.url = "github:NixOS/nixpkgs/nixos-26.05";
 

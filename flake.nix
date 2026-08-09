@@ -11,6 +11,10 @@
         nixpkgs-wine.follows = "nixpkgs";
       };
     };
+    cua = {
+      url = "github:trycua/cua";
+      inputs.nixpkgs.follows = "nixpkgs-stable";
+    };
     den.url = "github:denful/den";
     flake-file.url = "github:vic/flake-file";
     flake-parts = {
