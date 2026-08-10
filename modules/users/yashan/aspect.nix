@@ -5,7 +5,8 @@
     den.batteries.programs.editor.defaults.neovim
     den.batteries.programs.pager.defaults.bat
     den.batteries.terminal.defaults.ghostty
-    den.batteries.terminal.session.defaults.tmux
+    den.batteries.terminal.session.defaults.herdr
+    den.aspects.terminal.session.tmux
     den.batteries.programs.browser.defaults.vivaldi
     den.batteries.programs.file-manager.defaults.nautilus
     den.batteries.desktop.shell.launcher.defaults.wofi

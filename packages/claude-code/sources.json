@@ -1,9 +1,9 @@
 {
     "platforms": {
         "x86_64-linux": {
-            "version": "2.1.223",
-            "url": "https://github.com/anthropics/claude-code/releases/download/v2.1.223/claude-linux-x64.tar.gz",
-            "hash": "sha256-C1FjBxkO37d2UB5cEqMtfQwLAdERD6ZTn9GHqEgq0k8="
+            "version": "2.1.226",
+            "url": "https://github.com/anthropics/claude-code/releases/download/v2.1.226/claude-linux-x64.tar.gz",
+            "hash": "sha256-SU7sQ0MoPBSZIuzf/LJxlguSDZyp4jjAzbNeHZb6qi0="
         }
     }
 }

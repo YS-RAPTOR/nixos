@@ -38,8 +38,8 @@ buildNpmPackage {
 
     substituteInPlace dist/modes/interactive/interactive-mode.js \
       --replace-fail \
-        '{ openUrl: openBrowser }' \
-        '{ openUrl: openBrowser, wheelScrollLines: 3 }'
+        '            openUrl: openBrowser,' \
+        '            openUrl: openBrowser, wheelScrollLines: 3,'
   '';
 
   dontNpmBuild = true;

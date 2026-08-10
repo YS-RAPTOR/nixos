@@ -2,6 +2,7 @@ return {
     "stevearc/conform.nvim",
     opts = {
         formatters_by_ft = {
+            ["markdown.handlebars"] = { lsp_format = "never" },
             javascript = { "prettier" },
             javascriptreact = { "prettier" },
             typescript = { "prettier" },
