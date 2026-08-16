@@ -1,9 +1,16 @@
 {
   den.aspects.system.base.core.nixos = {
-    nix.settings.experimental-features = [
-      "nix-command"
-      "flakes"
-    ];
+    nix.settings = {
+      accept-flake-config = true;
+      experimental-features = [
+        "nix-command"
+        "flakes"
+      ];
+      trusted-users = [
+        "root"
+        "raptor"
+      ];
+    };
 
     programs.nix-ld.enable = true;
 
