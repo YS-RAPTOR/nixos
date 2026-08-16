@@ -2,6 +2,7 @@
   den.aspects.desktop.compositor.hyprland.includes = [
     den.aspects.appearance.theme.stylix
     den.aspects.services.audio.pipewire
+    den.aspects.terminal.ghostty
     ({ user, host, ... }: {
       name = "hyprland(${user.userName}@${host.name})";
 
@@ -48,8 +49,7 @@
                 launcher = ${builtins.toJSON config.desktop.commands.launcher},
                 playerctl = ${builtins.toJSON (lib.getExe pkgs.playerctl)},
                 private_browser = ${builtins.toJSON config.desktop.commands.privateBrowser},
-                terminal_session = ${builtins.toJSON config.desktop.commands.terminalSession},
-                terminal_window_title = ${builtins.toJSON config.desktop.commands.terminalWindowTitle},
+                terminal = ${builtins.toJSON (lib.getExe config.programs.ghostty.package)},
                 wpctl = ${builtins.toJSON (lib.getExe' pkgs.wireplumber "wpctl")},
             }
           '';
@@ -86,14 +86,6 @@
                 {
                   name = "launcher";
                   value = config.desktop.commands.launcher;
-                }
-                {
-                  name = "terminal session";
-                  value = config.desktop.commands.terminalSession;
-                }
-                {
-                  name = "terminal window title";
-                  value = config.desktop.commands.terminalWindowTitle;
                 }
               ];
 

@@ -16,17 +16,5 @@
       type = lib.types.nullOr lib.types.str;
       default = null;
     };
-    terminalExec = lib.mkOption {
-      type = lib.types.nullOr lib.types.str;
-      default = null;
-    };
-    terminalSession = lib.mkOption {
-      type = lib.types.nullOr lib.types.str;
-      default = null;
-    };
-    terminalWindowTitle = lib.mkOption {
-      type = lib.types.nullOr lib.types.str;
-      default = null;
-    };
   };
 }

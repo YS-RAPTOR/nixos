@@ -17,16 +17,6 @@
       let
         colors = config.lib.stylix.colors;
 
-        tmuxStatus = pkgs.writeShellApplication {
-          name = "waybar-tmux-status";
-          runtimeInputs = [
-            pkgs.coreutils
-            pkgs.jq
-            pkgs.tmux
-          ];
-          text = builtins.readFile ./_scripts/tmux.sh;
-        };
-
         colorpicker = pkgs.writeShellApplication {
           name = "waybar-colorpicker";
           runtimeInputs = [
@@ -124,9 +114,7 @@
             };
 
             "custom/logo" = {
-              format = "{}";
-              return-type = "json";
-              exec = "${tmuxStatus}/bin/waybar-tmux-status";
+              format = config.home.username;
             };
 
             clock = {
@@ -283,15 +271,8 @@
               border-radius: 0 15px 15px 0;
               margin-right: 5px;
               color: #${colors.base02};
-              font-weight: 900;
-            }
-
-            #custom-logo.active {
-              background: #${colors.base09};
-            }
-
-            #custom-logo.inactive {
               background: #${colors.base0B};
+              font-weight: 900;
             }
 
             .modules-right {

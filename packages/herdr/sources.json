@@ -1,9 +1,0 @@
-{
-    "platforms": {
-        "x86_64-linux": {
-            "version": "0.8.0",
-            "url": "https://github.com/herdrdev/herdr/releases/download/v0.8.0/herdr-linux-x86_64",
-            "hash": "sha256-uHLqfkD6LLF+hXrJtisb8m23tAPGIvXS8/WzX26azSg="
-        }
-    }
-}

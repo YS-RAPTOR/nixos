@@ -59,8 +59,7 @@ buildNpmPackage {
 
   postFixup = ''
     wrapProgram "$out/bin/pi" \
-      --prefix PATH : ${lib.makeBinPath [ ripgrep ]} \
-      --add-flags "--exclude-tools bash"
+      --prefix PATH : ${lib.makeBinPath [ ripgrep ]}
   '';
 
   doInstallCheck = true;
