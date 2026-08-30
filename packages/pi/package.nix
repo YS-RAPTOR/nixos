@@ -36,10 +36,6 @@ buildNpmPackage {
       npm-shrinkwrap.json > npm-shrinkwrap.json.patched
     mv npm-shrinkwrap.json.patched npm-shrinkwrap.json
 
-    substituteInPlace dist/modes/interactive/interactive-mode.js \
-      --replace-fail \
-        '            openUrl: openBrowser,' \
-        '            openUrl: openBrowser, wheelScrollLines: 3,'
   '';
 
   dontNpmBuild = true;
@@ -51,11 +47,6 @@ buildNpmPackage {
   npmRebuildFlags = [ "--ignore-scripts" ];
 
   nativeBuildInputs = [ makeWrapper ];
-
-  postInstall = ''
-    ${nodejs_24}/bin/node ${./patch-scrollbar.mjs} \
-      "$out/lib/node_modules/@earendil-works/pi-coding-agent/node_modules/@earendil-works/pi-tui/dist/layout.js"
-  '';
 
   postFixup = ''
     wrapProgram "$out/bin/pi" \

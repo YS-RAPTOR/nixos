@@ -194,6 +194,73 @@ update_npm() {
     echo "Updated $package from $package_name@$version"
 }
 
+prefetch_cargo_hash() {
+    local package="$1"
+    local output cargo_hash
+
+    echo "Prefetching Cargo dependencies for $package..." >&2
+    if output="$(nix build "path:$root#$package" --no-link 2>&1)"; then
+        echo "Expected a Cargo dependency hash mismatch for $package" >&2
+        return 1
+    fi
+
+    cargo_hash="$(
+        sed -n 's/^[[:space:]]*got:[[:space:]]*//p' <<<"$output" |
+            grep '^sha256-' |
+            tail -n 1
+    )"
+
+    if [[ -z $cargo_hash ]]; then
+        echo "$output" >&2
+        echo "Could not resolve the Cargo dependency hash for $package" >&2
+        return 1
+    fi
+
+    printf '%s\n' "$cargo_hash"
+}
+
+update_github_release_cargo_source() {
+    local package="$1"
+    local config="$2"
+    local sources="$3"
+    local repository release tag version url hash cargo_hash temporary
+    local fake_hash="sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="
+
+    repository="$(jq --raw-output .repository "$config")"
+    release="$(github_api "repos/$repository/releases/latest")"
+    tag="$(jq --raw-output .tag_name <<<"$release")"
+    version="${tag#v}"
+    url="https://github.com/$repository/archive/refs/tags/$tag.tar.gz"
+    hash="$(
+        nix store prefetch-file --unpack --json "$url" |
+            jq --raw-output .hash
+    )"
+
+    temporary="$(mktemp "$sources.XXXXXX")"
+    jq --null-input --indent 4 \
+        --arg version "$version" \
+        --arg url "$url" \
+        --arg hash "$hash" \
+        --arg cargoHash "$fake_hash" \
+        '{
+            version: $version,
+            url: $url,
+            hash: $hash,
+            cargoHash: $cargoHash
+        }' >"$temporary"
+    mv "$temporary" "$sources"
+
+    cargo_hash="$(prefetch_cargo_hash "$package")"
+    temporary="$(mktemp "$sources.XXXXXX")"
+    jq --indent 4 \
+        --arg cargoHash "$cargo_hash" \
+        '.cargoHash = $cargoHash' \
+        "$sources" >"$temporary"
+    mv "$temporary" "$sources"
+
+    echo "Updated $package from $repository@$tag"
+}
+
 update_package() {
     local package="$1"
     local config="$root/packages/$package/update.json"
@@ -215,6 +282,9 @@ update_package() {
     case "$update_type" in
     github-release)
         update_github_release "$package" "$config" "$sources"
+        ;;
+    github-release-cargo-source)
+        update_github_release_cargo_source "$package" "$config" "$sources"
         ;;
     npm)
         update_npm "$package" "$config" "$sources"

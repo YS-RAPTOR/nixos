@@ -15,6 +15,8 @@
           colors = config.lib.stylix.colors.withHashtag;
         in
         {
+          home.packages = [ self'.packages.agent-browser ];
+
           programs.pi-coding-agent = {
             enable = true;
             package = self'.packages.pi;
@@ -35,12 +37,14 @@
                 blockImages = false;
               };
               outputPad = 1;
-              packages = [ "npm:@ogulcancelik/pi-codex-compaction@0.1.3" ];
+              packages = [
+                "npm:pi-codex-tools@0.2.3"
+                "npm:@ogulcancelik/pi-codex-compaction@0.1.3"
+              ];
               terminal = {
                 imageWidthCells = 60;
                 showImages = true;
               };
-              tuiMode = "fullscreen";
             };
           };
 

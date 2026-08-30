@@ -76,6 +76,7 @@
         scrollback-limit-bytes = 1000000000;
         scrollbar = "never";
         scroll-to-bottom = "no-keystroke,no-output";
+        window-new-tab-position = "end";
         window-padding-color = "extend";
         notify-on-command-finish = "unfocused";
         notify-on-command-finish-action = "bell,no-notify";

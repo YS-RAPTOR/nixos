@@ -1,0 +1,79 @@
+diff --git a/src/native/browser.rs b/src/native/browser.rs
+index 1111111..2222222 100644
+--- a/src/native/browser.rs
++++ b/src/native/browser.rs
+@@ -14,5 +14,13 @@ use super::element::{resolve_element_object_id, RefMap};
+ use super::tab_binding;
+ 
++/// Vivaldi acknowledges `Target.createTarget` before the renderer accepts
++/// commands on a flattened session. Attaching immediately produces a session
++/// whose `Page.enable` never answers. Give newly-created renderers a short
++/// readiness window before the first attach.
++pub(super) async fn wait_for_new_target_ready() {
++    tokio::time::sleep(Duration::from_millis(100)).await;
++}
++
+ // ---------------------------------------------------------------------------
+ // Launch validation
+ // ---------------------------------------------------------------------------
+@@ -691,6 +701,8 @@ impl BrowserManager {
+                 )
+                 .await?;
+ 
++            wait_for_new_target_ready().await;
++
+             let attach_result: AttachToTargetResult = self
+                 .client
+                 .send_command_typed(
+@@ -1389,6 +1401,8 @@ impl BrowserManager {
+             )
+             .await?;
+ 
++        wait_for_new_target_ready().await;
++
+         let attach_result: AttachToTargetResult = self
+             .client
+             .send_command_typed(
+@@ -1554,6 +1568,8 @@ impl BrowserManager {
+             )
+             .await?;
+ 
++        wait_for_new_target_ready().await;
++
+         let attach: AttachToTargetResult = self
+             .client
+             .send_command_typed(
+diff --git a/src/native/actions.rs b/src/native/actions.rs
+index 3333333..4444444 100644
+--- a/src/native/actions.rs
++++ b/src/native/actions.rs
+@@ -6838,6 +6838,8 @@ async fn handle_recording_start(
+             )
+             .await?;
+ 
++        super::browser::wait_for_new_target_ready().await;
++
+         let attach_result: AttachToTargetResult = mgr
+             .client
+             .send_command_typed(
+@@ -9570,6 +9572,8 @@ async fn handle_window_new(cmd: &Value, state: &mut DaemonState) -> Result<Value
+             )
+             .await?;
+ 
++        super::browser::wait_for_new_target_ready().await;
++
+         let attach: super::cdp::types::AttachToTargetResult = mgr
+             .client
+             .send_command_typed(
+diff --git a/src/native/state.rs b/src/native/state.rs
+index 5555555..6666666 100644
+--- a/src/native/state.rs
++++ b/src/native/state.rs
+@@ -126,6 +126,8 @@ async fn collect_storage_via_temp_target(
+ 
+     let target_id = create_result.target_id;
+ 
++    super::browser::wait_for_new_target_ready().await;
++
+     // Ensure the target is closed even if attach or later steps fail
+     let result = collect_storage_in_target(client, &target_id, origins, origin_js).await;
